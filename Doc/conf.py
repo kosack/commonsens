@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Sensitivity documentation build configuration file, created by
+# GammaSens documentation build configuration file, created by
 # sphinx-quickstart on Thu Jul  4 11:57:21 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Sensitivitydoc'
+htmlhelp_basename = 'GammaSensdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Sensitivity.tex', u'Sensitivity Documentation',
+  ('index', 'GammaSens.tex', u'GammaSens Documentation',
    u'K. Kosack', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sensitivity', u'Sensitivity Documentation',
+    ('index', 'sensitivity', u'GammaSens Documentation',
      [u'K. Kosack'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Sensitivity', u'Sensitivity Documentation',
-   u'K. Kosack', 'Sensitivity', 'One line description of project.',
+  ('index', 'GammaSens', u'GammaSens Documentation',
+   u'K. Kosack', 'GammaSens', 'One line description of project.',
    'Miscellaneous'),
 ]
 
