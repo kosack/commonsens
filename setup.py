@@ -1,10 +1,6 @@
 from distutils.core import setup
 import sys
 
-sys.path.append('gammasens')
-import gammasens
-
-
 setup(name='gammasens',
       version='1.0',
       author='Karl Kosack',
@@ -12,12 +8,15 @@ setup(name='gammasens',
 #      url='',
 #      download_url='',
       description='Python-based Sensitivity calculator for Ground-based Gamma-Ray telescopes',
-      long_description=gammasens.__doc__,
-      package_dir={'': 'gammasens'},
-      py_modules=['gammasens','sensitivity','inputs','spectra'],
-      provides=['gammasens'],
-      keywords='IACT gamma sensitivity',
-      license='',
+      long_description='',
+      packages=['gammasens'],
+#      package_dir={'': 'gammasens'},
+#      py_modules=['sensitivity',
+#                  'inputs',
+#                  'spectra'],
+#      provides=['gammasens'],
+#      keywords='IACT gamma sensitivity',
+#      license='',
       # classifiers=['Development Status :: 5 - Production/Stable',
       #              'Intended Audience :: Developers',
       #              'Natural Language :: English',
