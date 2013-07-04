@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     # do the same in crab units:
     plt.figure()
-    for hours in [0.5,2,5,0]:
+    for hours in [0.5,2,5,50]:
         gs.sensitivity.plot_sensitivity_crabunits( \
                             gs.sensitivity.calc_sensitivity("Thomas", 
                                                             gammas,
