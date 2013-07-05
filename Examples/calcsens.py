@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     # load the example files
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
-    gammas,electrons,protons = gs.inputs.loadAllFromFITS("thomas", filepat)
+    gammas,electrons,protons = gs.inputs.loadAllFromFITS(filepat)
 
 
 

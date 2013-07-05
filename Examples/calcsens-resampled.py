@@ -9,7 +9,7 @@ if __name__ == '__main__':
     resample = True
 
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
-    gammas,electrons,protons = inputs.loadAllFromFITS("thomas", filepat)
+    gammas,electrons,protons = inputs.loadAllFromFITS(filepat)
 
 
     # also try with resampled distributions:

@@ -14,7 +14,7 @@ from matplotlib.widgets import Slider, Button, RadioButtons
 if __name__ == '__main__':
     
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
-    gammas,electrons,protons = inputs.loadAllFromFITS("thomas", filepat)
+    gammas,electrons,protons = inputs.loadAllFromFITS(filepat)
 
 
     obstime_hrs  = 50.0
@@ -37,7 +37,6 @@ if __name__ == '__main__':
     ax_minsignif = axes([0.25, 0.06, 0.65, 0.03], axisbg=axcolor)
     slider_minsignif= Slider(ax_minsignif, 'Min Signif', 1.0, 30.0, 
                              valinit=min_signif)
-
 
     ax_minevents = axes([0.25, 0.01, 0.65, 0.03], axisbg=axcolor)
     slider_minevents= Slider(ax_minevents, 'Min events', 0.0, 50.0, 
@@ -68,8 +67,6 @@ if __name__ == '__main__':
     slider_minevents.on_changed(update)
 
     update(None)
-
-  
 
     show()
     

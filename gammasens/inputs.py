@@ -303,7 +303,7 @@ class ParticleDistribution(object):
 
 
 
-def loadAllFromFITS(name, filepattern):
+def loadAllFromFITS(filepattern, species = ['gamma','electron','proton']):
     """Load set of particle species (gammas, electrons, hadrons) assuming
     the files are named identically, but with the character "*"
     replaced with "gamma", "electron" or "proton" in the filename.
@@ -312,11 +312,10 @@ def loadAllFromFITS(name, filepattern):
     :param filepattern: filename, with the particle type replaced with *
     """
 
-    species = ['gamma','electron','proton']
     dists = []
 
     for particle in species:
-        dist = ParticleDistribution.fromFITS(name, 
+        dist = ParticleDistribution.fromFITS(species, 
                                              filepattern.replace("*", particle))
         dists.append(dist)
 

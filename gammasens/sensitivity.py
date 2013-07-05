@@ -308,7 +308,7 @@ def plot_sensitivity_crabunits( sens ):
 
 if __name__ == '__main__':
 
-    gammas, electrons, protons = inputs.loadAllFromFITS( "TEST", "test-*.fits" )
+    gammas, electrons, protons = inputs.loadAllFromFITS( "test-*.fits" )
     sens = calc_sensitivity( gammas, electrons, protons )
 
 
