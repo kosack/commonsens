@@ -199,10 +199,10 @@ def plot_effareas( gammas, electrons, protons ):
 
 
 def plot_count_distributions( sens ):
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, sens['N_on'], label="N_on", **PSTY  )
-    plt.semilogy( logE, sens['N_off'], color='r', label="N_off", **PSTY )
-    plt.semilogy( logE, excess(sens['N_on'],sens['N_off'],sens['alpha']), 
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    plt.semilogy( log_e, sens['N_on'], label="N_on", **PSTY  )
+    plt.semilogy( log_e, sens['N_off'], color='r', label="N_off", **PSTY )
+    plt.semilogy( log_e, excess(sens['N_on'],sens['N_off'],sens['alpha']), 
                   color='black', label="N_exc", **PSTY )
     plt.ylabel("Counts ({0})".format(sens['params']['obstime']))
     plt.xlabel("Log10(E/TeV)")
@@ -211,11 +211,11 @@ def plot_count_distributions( sens ):
 
 def plot_significances( sens ):
     """ sens: output dictionary from calc_sensitivity """ 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.scatter( logE, signif_lima( sens['N_on'], sens['N_off'], 
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    plt.scatter( log_e, signif_lima( sens['N_on'], sens['N_off'], 
                                     sens['alpha'] ), 
                  label="with constraints" )
-    plt.scatter( logE, signif_lima( sens['N_on_orig'], sens['N_off'], 
+    plt.scatter( log_e, signif_lima( sens['N_on_orig'], sens['N_off'], 
                                     sens['alpha']),
                  label="minimum", color='grey' )
     plt.ylabel("Significance")
@@ -224,15 +224,15 @@ def plot_significances( sens ):
 
 
 def plot_rates( sens ):
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, sens['rate_p'],label="p ", **PSTY)
-    plt.semilogy( logE, sens['rate_e'],label="e- ",**PSTY)
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    plt.semilogy( log_e, sens['rate_p'],label="p ", **PSTY)
+    plt.semilogy( log_e, sens['rate_e'],label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
     excess_rate = excess(sens['N_on'],sens['N_off'],sens['alpha'])*units.ct \
                   / sens['params']['obstime']
 
-    plt.semilogy( logE, excess_rate.to(units.ct/units.s),
+    plt.semilogy( log_e, excess_rate.to(units.ct/units.s),
                   label=r"$\gamma_\mathrm{exc}$",color='g', 
                   drawstyle='steps-mid', linestyle='--'  )
 
@@ -248,7 +248,7 @@ def plot_sensitivity(sens, **kwargs):
     :param sens: sensitivity output dictrionary
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
 
     sensitivity = sens['sensitivity']
     par = sens['params']
@@ -256,7 +256,7 @@ def plot_sensitivity(sens, **kwargs):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
-    lines = plt.semilogy( logE, sensitivity.value, marker="+",
+    lines = plt.semilogy( log_e, sensitivity.value, marker="+",
                           label=label,**kwargs )
     plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
     plt.title("Differential Sensitivity")
@@ -268,19 +268,19 @@ def plot_crab( sens ):
     :param sens: output dictionary from calc_sensitivity()
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE) ), 
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e) ), 
                   linestyle="--", color='black',
                   label="100% Crab")
     
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE),fraction=0.1 ), 
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.1 ), 
                   linestyle="--", color='gray',
                   label="10% Crab" )
     
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE),fraction=0.01 ), 
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.01 ), 
                   linestyle=":", color='gray',
                   label=" 1% Crab" )
     
@@ -297,14 +297,14 @@ def plot_sensitivity_crabunits( sens ):
     :param sens: output dictionary from calc_sensitivity()
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    log_e = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
     sensitivity = sens['sensitivity']
     par = sens['params']
 
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
-    crabs = spectra.hess_crab_spectrum( 10**logE )
-    plt.plot( logE, sensitivity/crabs, label=label )
+    crabs = spectra.hess_crab_spectrum( 10**log_e )
+    plt.plot( log_e, sensitivity/crabs, label=label )
     plt.xlabel("log10(E/TeV)")
     plt.ylabel("Diff Sensitivity (Crab Units)")
 
