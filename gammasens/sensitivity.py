@@ -213,12 +213,14 @@ def plot_significances( sens ):
     """ sens: output dictionary from calc_sensitivity """ 
     logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
     plt.scatter( logE, signif_lima( sens['N_on'], sens['N_off'], 
-                                    sens['alpha'] ) )
+                                    sens['alpha'] ), 
+                 label="with constraints" )
     plt.scatter( logE, signif_lima( sens['N_on_orig'], sens['N_off'], 
-                                    sens['alpha'] ),
-                 color='grey' )
+                                    sens['alpha']),
+                 label="minimum", color='grey' )
     plt.ylabel("Significance")
     plt.xlabel("Log10(E/TeV)")
+    plt.legend(loc='best')
 
 
 def plot_rates( sens ):
