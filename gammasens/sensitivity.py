@@ -159,8 +159,6 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
 
     sens = sens.to("ct cm**-2 s**-1 TeV**-1")
 
-    # plot the sensitivity curve
-
     if verbose:
         print "#logE_lo  logE_hi  Sensitivity",sens.unit
         for el,eh,s in zip(gammas.log_e_lo, gammas.log_e_hi,sens.value):
@@ -186,15 +184,14 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
                  rate_p = rp,
                  rate_e = re )
 
-
 def plot_effareas( gammas, electrons, protons ):
 
-    plt.semilogy( protons.log_e, protons.effective_area_reco(), label="p",
-                  **PSTY)
-    plt.semilogy( electrons.log_e, electrons.effective_area_reco(), label="e-",
-                  **PSTY )
-    plt.semilogy( gammas.log_e, gammas.effective_area_reco(), label=r"$\gamma$",
-                  **PSTY)
+    plt.semilogy( protons.log_e, protons.effective_area_reco(), 
+                  label="p", **PSTY)
+    plt.semilogy( electrons.log_e, electrons.effective_area_reco(), 
+                  label="e-", **PSTY )
+    plt.semilogy( gammas.log_e, gammas.effective_area_reco(), 
+                  label=r"$\gamma$", **PSTY)
     plt.ylabel("Effective Area (m)")
     plt.xlabel("log E$_{reco}$/TeV")
     plt.legend(loc="best")
@@ -241,8 +238,8 @@ def plot_rates( sens ):
 
 def plot_sensitivity(sens, **kwargs):
     """
-    
-    Arguments:
+    Display the differential sensitivity curve 
+
     :param sens: sensitivity output dictrionary
     """
 
@@ -262,7 +259,9 @@ def plot_sensitivity(sens, **kwargs):
     return lines
 
 def plot_crab( sens ):
-    """ call after plot_sensitivity() to overplot Crab flux """
+    """ call after plot_sensitivity() to overplot Crab flux 
+    :param sens: output dictionary from calc_sensitivity()
+    """
 
     logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
     plt.semilogy( logE, 
@@ -289,7 +288,10 @@ def plot_sensitivity_crabunits( sens ):
     
     The crab model currently used is only valid in the VHE energy
     range (100 GeV-100TeV)
+
+    :param sens: output dictionary from calc_sensitivity()
     """
+
     logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
     sensitivity = sens['sensitivity']
     par = sens['params']
