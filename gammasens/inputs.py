@@ -315,7 +315,7 @@ def loadAllFromFITS(filepattern, species = ['gamma','electron','proton']):
     dists = []
 
     for particle in species:
-        dist = ParticleDistribution.fromFITS(species, 
+        dist = ParticleDistribution.fromFITS(particle, 
                                              filepattern.replace("*", particle))
         dists.append(dist)
 
