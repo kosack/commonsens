@@ -105,21 +105,20 @@ class ParticleDistribution(object):
 
 
     def getResampledDistribution(self, log_e_min, log_e_max, nbins):
-        """returns new distribution interpolated using splines to a new
-        binning. Be careful to set the min and max in valid ranges
+        """
+        returns new ParticleDistribution interpolated using splines to a
+        new binning. Be careful to set the min and max in valid ranges
         where there is good statistics per bin in the original
         distribution, otherwise the interpolation will go crazy
 
         note that this creates new binning from an old one, but does
         not increase statistics. To do that you should rebin first,
-        and then resample. Note that only summable quantities can be
+        and then resample. Also note that only summable quantities can be
         rebinned, others should be interpolated.
 
-        Arguments:
         :param log_e_min: new lowest energy (left edge of first bin)
         :param log_e_max: new highest energy (right edge of last bin)
         :param nbins: new number of bins
-
         """
         
         therange = np.linspace(log_e_min,log_e_max, nbins+1)
