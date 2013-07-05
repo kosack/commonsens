@@ -18,7 +18,7 @@ EPSILON = 1.0e-10
 PSTY = {'linestyle':'steps-mid', 'linewidth':2} # default line style    
 
 
-def solidAngle( theta ):
+def solid_angle( theta ):
     """
     Returns the solid angle for a circular region of angular radius
     `theta`
@@ -30,7 +30,7 @@ def solidAngle( theta ):
 
 
 @np.vectorize
-def lima(n_on,n_off,alpha):
+def signif_lima(n_on,n_off,alpha):
     """
     Li and Ma significance formula 
 
@@ -66,7 +66,7 @@ def residual_signif(N_on, N_off, alpha, minsig):
     """
     used my minimization routine to invert the Li and Ma formula
     """
-    return minsig - lima( N_on, N_off, alpha)
+    return minsig - signif_lima( N_on, N_off, alpha)
 
 
 def excess(N_on, N_off, alpha):
@@ -110,10 +110,11 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
         print "       min_events: ", min_events
         print "      min_sys_pct: ", min_sys_pct,"%"
 
-    # nominal rates in HZ over the theta2 regions used by each particle species
-    # note: does FOV have to be used for phi_diffuse if it is much smaller?
-    rp_nom = protons.rate_per_solidangle() * solidAngle( protons.phi_diffuse )
-    re_nom = electrons.rate_per_solidangle()*solidAngle( electrons.phi_diffuse )
+    # nominal rates in HZ over the theta2 regions used by each
+    # particle species note: does FOV have to be used for phi_diffuse
+    # if it is much smaller?
+    rp_nom = protons.rate_per_solidangle()*solid_angle(protons.phi_diffuse)
+    re_nom = electrons.rate_per_solidangle()*solid_angle(electrons.phi_diffuse)
     # now want to normalize to the gamma-ray theta^2 cut (since the
     # protons and electrons were done at different cuts)
     rp = rp_nom * (gammas.thetasqr / (protons.thetasqr+EPSILON*units.deg))
@@ -129,7 +130,7 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
     N_off[N_off<EPSILON] = np.nan
 
     # want to calcualte N_gamma = N_on-alpha*N_off such that:
-    #  5sigma = lima( N_on, N_off, alpha)
+    #  5sigma = signif_lima( N_on, N_off, alpha)
     #  - if the excess N_gamma = (N_on-alpha*N_off) < 10.0, excess = 10
     #  - if  N_gamma < N_off * 5.0% , then N_gamma = N_off*5%
 
@@ -211,8 +212,10 @@ def plot_count_distributions( sens ):
 def plot_significances( sens ):
     """ sens: output dictionary from calc_sensitivity """ 
     logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.scatter( logE, lima( sens['N_on'], sens['N_off'], sens['alpha'] ) )
-    plt.scatter( logE, lima( sens['N_on_orig'], sens['N_off'], sens['alpha'] ),
+    plt.scatter( logE, signif_lima( sens['N_on'], sens['N_off'], 
+                                    sens['alpha'] ) )
+    plt.scatter( logE, signif_lima( sens['N_on_orig'], sens['N_off'], 
+                                    sens['alpha'] ),
                  color='grey' )
     plt.ylabel("Significance")
     plt.xlabel("Log10(E/TeV)")
