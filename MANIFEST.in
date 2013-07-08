@@ -1,5 +1,6 @@
 recursive-include Doc/_build/html *
 recursive-include Examples *.py
+recursive-include Utilities *.py
 prune Doc/_build/doctrees
 exclude Doc/_build/html/.buildinfo
 include LICENSE.txt

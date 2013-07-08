@@ -6,6 +6,8 @@
 Sensitivity Calculation for Ground-based Gamma-Ray Instruments
 ==============================================================
 
+*version* |version|
+
 This is a collection of python code used to generate sensitivity
 curves (and other related products) for Gamma-Ray telescopes from
 simple Monte-Carlo input data.
@@ -19,6 +21,14 @@ The code is broken into several modules:
    inputs
    spectra
    format
+
+
+Features:
+---------
+
+* units are propegated when possible (via :class:`astropy.units`)
+* calculations are done using
+
       
 Input Data
 ----------
@@ -63,6 +73,7 @@ curve changes.
    :scale: 50%         
    
    example of an interactive sensitivity plot (with realtime controls)
+
 
 
 Indices and tables

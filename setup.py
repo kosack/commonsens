@@ -2,7 +2,7 @@ from distutils.core import setup
 import sys
 
 setup(name='gammasens',
-      version='1.0',
+      version='1.0-r1',
       author='Karl Kosack',
       author_email='karl.kosack@cea.fr',
 #      url='',

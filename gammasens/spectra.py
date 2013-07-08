@@ -7,28 +7,62 @@ import numpy as np
 from math import pi
 from astropy import units
 
-def electron_spectrum(Etrue_tev):
+def powerlaw( E, index, norm, norm_energy ):
+    return norm*(E/norm_energy)**(-index)
+
+def lognormal( E, center, width ):
+        return  1.0/(E*width*np.sqrt(2)*pi) * np.exp( -(np.log(E)-center)**2/(2.0*width**2))
+
+
+def electron_spectrum(e_true_tev):
     """Cosmic-Ray Electron spectrum CTA version, with Fermi Shoulder, in
     units of :math:`\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}`
 
-    :param Etrue: true energy of electron in TeV 
+    .. math::
+       {dN \over dE dA dt d\Omega} = 
+
     """
 
-    return units.Quantity(6.85e-5 * Etrue_tev**-3.21 + \
-        3.18e-3/(Etrue_tev*0.776*np.sqrt(2*pi)) * \
-        np.exp(-0.5 * (np.log(Etrue_tev/0.107)/0.776)**2), 
+    return units.Quantity(6.85e-5 * e_true_tev**-3.21 + \
+        3.18e-3/(e_true_tev*0.776*np.sqrt(2*pi)) * \
+        np.exp(-0.5 * (np.log(e_true_tev/0.107)/0.776)**2), 
                           "TeV**-1 s**-1 m**-2 sr**-1")
 
-def proton_spectrum(Etrue_tev):
-    """returns cosmic-ray proton spectrum in units of :math:`\mathrm{TeV^{-1}
-    s^{-1} m^{-2} sr^{-1}}`
-   
-    :param Etrue_tev: true proton energy in TeV
+def electron_spectrum_powerlaw(e_true_tev):
+    """ simple power-law cosmic-ray electron spectrum """
+    norm = units.Quantity(6.85e-5, "1/(TeV s m**2 sr)") 
+    return powerlaw( e_true_tev, index=3.21, norm=norm, norm_energy=1 )
+
+
+def electron_spectrum_fermi(e_true_tev, E_peak_tev=0.107, width=0.776):
+    """ cosmic ray electron spectrum including Fermi shoulder 
+    units of :math:`\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}
     """
 
-    return units.Quantity(0.096 * Etrue_tev**-2.7,"TeV**-1 s**-1 m**-2 sr**-1")
+    # including Fermi shoulder: powerlaw plus lognormal
 
-def cosmicray_spectrum(Etrue_tev):
+    amp_peak = units.Quantity(3.186e-3,"1/(TeV s m**2 sr)")
+
+    return electron_spectrum_powerlaw(e_true_tev) \
+        + amp_peak*lognormal(e_true_tev, 
+                             center= np.log(E_peak_tev), 
+                             width=width)
+
+
+def proton_spectrum(e_true_tev):
+    """returns cosmic-ray proton spectrum 
+
+    .. math::
+        {dN \over dE dA dt d\Omega} = 0.096 ({E_t \over TeV})^{-2.7}
+   
+
+    in units of :math:`\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}`
+    """
+
+    norm = units.Quantity(0.096,"TeV**-1 s**-1 m**-2 sr**-1")
+    return powerlaw(e_true_tev, norm=norm, index=-2.7,norm_energy=1.0)
+
+def cosmicray_spectrum(e_true_tev):
     """
     takes into account higher-Z CRs, not just protons
 
@@ -36,11 +70,11 @@ def cosmicray_spectrum(Etrue_tev):
     trigger rate at the end is 10% higher than the proton rate due to
     the other species)
     """
-    return proton_spectrum(Etrue_tev) * 1.1
+    return proton_spectrum(e_true_tev) * 1.1
 
-def hess_crab_spectrum(Etrue_tev, fraction=1.0) :
+def hess_crab_spectrum(e_true_tev, fraction=1.0) :
     norm = fraction*units.Quantity(3.76e-11, "ct cm**-2 s**-1 TeV**-1")
-    return  norm * Etrue_tev**-2.39 * np.exp(-Etrue_tev/14.3)
+    return  powerlaw( e_true_tev, norm=norm, index=2.39)* np.exp(-e_true_tev/14.3)
 
 def hess_binned_crab_spectrum(logEmin, logEmax, fraction=1.0):
     spec = np.zeros_like(logEmin)
