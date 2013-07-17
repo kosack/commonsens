@@ -250,6 +250,7 @@ def plot_significances( log_e, sens ):
                  color='grey' )
     plt.ylabel("Significance")
     plt.xlabel("Log10(E/TeV)")
+    plt.legend(loc='best')
 
 
 def plot_rates( log_e, rate_p, rate_e, sens ):
