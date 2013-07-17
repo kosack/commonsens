@@ -330,3 +330,21 @@ def loadAllFromFITS(filepattern, species = ['gamma','electron','proton']):
 
     return dists
     
+
+
+def load_cta_response(filename):
+    """read Bernloehr-style CTA text response file, that is already
+    pre-processed (e.g. background rate is already calculated). This
+    is included for comparing older CTA sensitivity output to those
+    calculated with ParticleDistributions
+    """
+    AA = np.loadtxt(filename)
+    log_e = AA[:,0]
+    delta_log_e = log_e[1]-log_e[0]
+    delta_e = 10**(np.ones_like(AA[:,0]) * delta_log_e)
+    sens = AA[:,6]
+
+    return (log_e, delta_e * units.TeV, AA[:,1] *units.m**2,
+            AA[:,5] * units.count/units.s, 
+            units.Quantity(AA[:,6],"erg/(cm**2 s)") )
+    

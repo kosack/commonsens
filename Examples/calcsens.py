@@ -8,7 +8,6 @@ if __name__ == '__main__':
     # load the example files
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
     gammas,electrons,protons = gs.inputs.loadAllFromFITS(filepat)
-
     bgrate,rate_p,rate_e = gs.sensitivity.calc_background_rate( gammas, 
                                                                 electrons, 
                                                                 protons, 
@@ -25,7 +24,7 @@ if __name__ == '__main__':
                                                obstime=hours*units.h)
         gs.sensitivity.plot_sensitivity( gammas.log_e, out )
 
-    gs.sensitivity.plot_crab( gammas.log_e, out ) # overlay Crab contours
+    gs.sensitivity.plot_crab( gammas.log_e ) # overlay Crab contours
     plt.legend(loc="best")
     plt.grid(alpha=0.3)    
 

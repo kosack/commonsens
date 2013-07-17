@@ -104,14 +104,15 @@ def calc_background_rate(gammas, electrons, protons, return_all=False):
 
 def calc_sensitivity_from_distributions( name, gammas, electrons, protons,  
                                          **kwargs ):
-    """
-    
+    """Calculate sensitivity from input ParticleDistributions for gammas,
+    electrons, and protons.
+
     Arguments:
-    - `name`:
-    - `gammas`:
-    - `electrons`:
-    - `protons`:
-    
+    :param `name`:
+    :param gammas,electrons,protons: particle input data
+    :type gammas,electrons,protons: :class:`~gammasens.inputs.ParticleDistribution`
+    :param kwargs:: see gammasens.sensitivity.calc_sensitivity()
+
     """
     
     background_rate = calc_background_rate( gammas, electrons,protons)
@@ -149,7 +150,7 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
     if verbose:
         print "CALCULATING SENSITIVITY FOR '{0}':".format(name)
         print "   num_bg_regions: ", num_bg_regions
-        print "          object name extends type stime: ", \
+        print "             time: ", \
             obstime.to(units.h),"(",obstime.to(units.min),")"
         print "       min_signif: ", min_signif
         print "       min_events: ", min_events
@@ -162,7 +163,6 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
 
     alpha = np.ones(N_bg.shape) / num_bg_regions
     N_off = N_bg * num_bg_regions
-    
     N_off[N_off<EPSILON] = np.nan
 
     # want to calcualte N_gamma = N_on-alpha*N_off such that:
@@ -291,9 +291,8 @@ def plot_sensitivity(log_e, sens, **kwargs):
     plt.ylim(1e-14, 1e-5)
     return lines
 
-def plot_crab( log_e, sens ):
+def plot_crab( log_e ):
     """ call after plot_sensitivity() to overplot Crab flux 
-    :param sens: output dictionary from calc_sensitivity()
     """
 
     plt.semilogy( log_e, 
