@@ -7,8 +7,12 @@ import numpy as np
 from math import pi
 from astropy import units
 
-def powerlaw( E, index, norm, norm_energy=1.0 ):
-    return norm*(E/norm_energy)**(-index)
+def powerlaw( energy, index, norm, norm_energy=1.0 ):
+    return norm*(energy/norm_energy)**(-index)
+
+def exponential_cutoff(energy, cutoff_energy):
+    return np.exp(-energy/cutoff_energy)
+    
 
 def lognormal( E, center, width ):
         return  1.0/(E*width*np.sqrt(2)*pi) * np.exp( -(np.log(E)-center)**2/(2.0*width**2))
@@ -75,7 +79,8 @@ def cosmicray_spectrum(e_true_tev):
 def hess_crab_spectrum(e_true_tev, fraction=1.0) :
     norm = fraction*units.Quantity(3.76e-11, "ct cm**-2 s**-1 TeV**-1")
     return  powerlaw( e_true_tev, norm=norm,
-                      index=2.39, norm_energy=1.0) * np.exp(-e_true_tev/14.3)
+                      index=2.39, norm_energy=1.0) \
+        * exponential_cutoff(e_true_tev, cutoff_energy=14.3)
 
 def hess_binned_crab_spectrum(logEmin, logEmax, fraction=1.0):
     spec = np.zeros_like(logEmin)

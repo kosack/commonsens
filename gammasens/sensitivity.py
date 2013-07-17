@@ -74,8 +74,36 @@ def excess(N_on, N_off, alpha):
     return (N_on - alpha*N_off)
 
 
+def calc_background_rate(gammas, electrons, protons, return_all=False):
+    """
+    Calculate the background rate, given the input particle distributions
 
-def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h, 
+    :param gammas: gamma ray input data
+    :type gammas: :class:`~gammasens.inputs.ParticleDistribution`
+    :param electrons: electron input data
+    :type electrons: :class:`~gammasens.inputs.ParticleDistribution`
+    :param protons: proton input data
+    :type protons: :class:`~gammasens.inputs.ParticleDistribution`
+    """
+
+    # nominal rates in HZ over the theta2 regions used by each
+    # particle species note: does FOV have to be used for phi_diffuse
+    # if it is much smaller?
+    rp_nom = protons.rate_per_solidangle()*solid_angle(protons.phi_diffuse)
+    re_nom = electrons.rate_per_solidangle()*solid_angle(electrons.phi_diffuse)
+    # now want to normalize to the gamma-ray theta^2 cut (since the
+    # protons and electrons were done at different cuts)
+    rp = rp_nom * (gammas.thetasqr / (protons.thetasqr+EPSILON*units.deg))
+    re = re_nom * (gammas.thetasqr / (electrons.thetasqr+EPSILON*units.deg))
+
+    if return_all:
+        return (re+rp), re,rp
+
+    return (re+rp)
+
+
+def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
+                     obstime=5*units.h, 
                      num_bg_regions=2, min_signif=5.0, min_events=10.0, 
                      min_sys_pct=5.0, verbose=False):
     """
@@ -84,12 +112,10 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
     for debugging and display
 
     :param name: identifier for plots
-    :param gammas: gamma ray input data
-    :type gammas: :class:`~gammasens.inputs.ParticleDistribution`
-    :param electrons: electron input data
-    :type electrons: :class:`~gammasens.inputs.ParticleDistribution`
-    :param protons: proton input data
-    :type protons: :class:`~gammasens.inputs.ParticleDistribution`
+    :param background_rate: background rate array, 
+                            as given by calc_background_rate()
+    :param gamma_aeff_reco: reconstructed effective area of gammas , after all cuts (as output by gammas.effective_area_reco())
+    :param delta_e: array of energy bins (not log), as output from gamma.deltaE
     :param obstime: observation time (as a units.Quantity)
     :param num_bg_regions: number of background regions to simulate
     :param min_signif: minimum significance per bin
@@ -110,18 +136,9 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
         print "       min_events: ", min_events
         print "      min_sys_pct: ", min_sys_pct,"%"
 
-    # nominal rates in HZ over the theta2 regions used by each
-    # particle species note: does FOV have to be used for phi_diffuse
-    # if it is much smaller?
-    rp_nom = protons.rate_per_solidangle()*solid_angle(protons.phi_diffuse)
-    re_nom = electrons.rate_per_solidangle()*solid_angle(electrons.phi_diffuse)
-    # now want to normalize to the gamma-ray theta^2 cut (since the
-    # protons and electrons were done at different cuts)
-    rp = rp_nom * (gammas.thetasqr / (protons.thetasqr+EPSILON*units.deg))
-    re = re_nom * (gammas.thetasqr / (electrons.thetasqr+EPSILON*units.deg))
-
+    
     # now calculate number of BG events in each energy bin:
-    N_bg = (rp + re) * obstime.to(units.s)
+    N_bg = background_rate * obstime.to(units.s)
     N_bg = N_bg.to(units.count).value
 
     alpha = np.ones(N_bg.shape) / num_bg_regions
@@ -156,16 +173,15 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
     # calculate sensitivity limit, and conver to proper units 
     N_on[np.isnan(N_off)] = np.nan  #chop off bad values
     sens = excess(N_on,N_off,alpha)*units.count \
-           /gammas.effective_area_reco()/obstime/gammas.deltaE
+           /gamma_aeff_reco/obstime/delta_e
 
     sens = sens.to("ct cm**-2 s**-1 TeV**-1")
 
-    if verbose:
-        print "#logE_lo  logE_hi  Sensitivity",sens.unit
-        for el,eh,s in zip(gammas.log_e_lo, gammas.log_e_hi,sens.value):
-            if np.isfinite(s):
-                print "{0:8.3f} {1:8.3f} {2:10.3g}".format(el,eh,s)
-
+    # if verbose:
+    #     print "#logE_lo  logE_hi  Sensitivity",sens.unit
+    #     for el,eh,s in zip(gammas.log_e_lo, gammas.log_e_hi,sens.value):
+    #         if np.isfinite(s):
+    #             print "{0:8.3f} {1:8.3f} {2:10.3g}".format(el,eh,s)
 
     # return all the output (including intermediate values) in a dict,
     # for later plotting
@@ -175,15 +191,11 @@ def calc_sensitivity(name, gammas,electrons,protons, obstime=5*units.h,
                               min_events=min_events,
                               min_sys_pct=min_sys_pct),
                  name=name,
-                 log_e_lo=gammas.log_e_lo,
-                 log_e_hi=gammas.log_e_hi,
                  sensitivity=sens,
                  N_on = N_on,
                  N_on_orig = N_on_orig,
                  N_off = N_off,
-                 alpha = alpha,
-                 rate_p = rp,
-                 rate_e = re )
+                 alpha = alpha )
 
 def plot_effareas( gammas, electrons, protons ):
 
@@ -198,94 +210,92 @@ def plot_effareas( gammas, electrons, protons ):
     plt.legend(loc="best")
 
 
-def plot_count_distributions( sens ):
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, sens['N_on'], label="N_on", **PSTY  )
-    plt.semilogy( logE, sens['N_off'], color='r', label="N_off", **PSTY )
-    plt.semilogy( logE, excess(sens['N_on'],sens['N_off'],sens['alpha']), 
+def plot_count_distributions( log_e, sens ):
+
+    plt.semilogy( log_e, sens['N_on'], label="N_on", **PSTY  )
+    plt.semilogy( log_e, sens['N_off'], color='r', label="N_off", **PSTY )
+    plt.semilogy( log_e, excess(sens['N_on'],sens['N_off'],sens['alpha']), 
                   color='black', label="N_exc", **PSTY )
     plt.ylabel("Counts ({0})".format(sens['params']['obstime']))
     plt.xlabel("Log10(E/TeV)")
     plt.legend(loc='best')
 
 
-def plot_significances( sens ):
+def plot_significances( log_e, sens ):
     """ sens: output dictionary from calc_sensitivity """ 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.scatter( logE, signif_lima( sens['N_on'], sens['N_off'], 
+
+    plt.scatter( log_e, signif_lima( sens['N_on'], sens['N_off'], 
                                     sens['alpha'] ) )
-    plt.scatter( logE, signif_lima( sens['N_on_orig'], sens['N_off'], 
+    plt.scatter( log_e, signif_lima( sens['N_on_orig'], sens['N_off'], 
                                     sens['alpha'] ),
                  color='grey' )
     plt.ylabel("Significance")
     plt.xlabel("Log10(E/TeV)")
 
 
-def plot_rates( sens ):
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, sens['rate_p'],label="p ", **PSTY)
-    plt.semilogy( logE, sens['rate_e'],label="e- ",**PSTY)
+def plot_rates( log_e, rate_p, rate_e, sens ):
+    plt.semilogy( log_e, rate_p,label="p ", **PSTY)
+    plt.semilogy( log_e, rate_e,label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
     excess_rate = excess(sens['N_on'],sens['N_off'],sens['alpha'])*units.ct \
                   / sens['params']['obstime']
 
-    plt.semilogy( logE, excess_rate.to(units.ct/units.s),
+    plt.semilogy( log_e, excess_rate.to(units.ct/units.s),
                   label=r"$\gamma_\mathrm{exc}$",color='g', 
                   drawstyle='steps-mid', linestyle='--'  )
 
 
-    plt.ylabel("Rate ({0})".format(sens['rate_p'].unit.to_string()) )
+    plt.ylabel("Rate ({0})".format(rate_p.unit.to_string()) )
     plt.xlabel("log E$_{reco}$/TeV")
     plt.legend( loc="best")
 
-def plot_sensitivity(sens, **kwargs):
+def plot_sensitivity(log_e, sens, **kwargs):
     """
     Display the differential sensitivity curve 
 
     :param sens: sensitivity output dictrionary
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-
+    
     sensitivity = sens['sensitivity']
     par = sens['params']
 
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
-    lines = plt.semilogy( logE, sensitivity.value, marker="+",
+    lines = plt.semilogy( log_e, sensitivity.value, marker="+",
                           label=label,**kwargs )
     plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
+    plt.xlabel("log E$_{reco}$/TeV")
     plt.title("Differential Sensitivity")
     plt.ylim(1e-14, 1e-5)
     return lines
 
-def plot_crab( sens ):
+def plot_crab( log_e, sens ):
     """ call after plot_sensitivity() to overplot Crab flux 
     :param sens: output dictionary from calc_sensitivity()
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE) ), 
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e) ), 
                   linestyle="--", color='black',
                   label="100% Crab")
     
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE),fraction=0.1 ), 
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.1 ), 
                   linestyle="--", color='gray',
                   label="10% Crab" )
     
-    plt.semilogy( logE, 
-                  spectra.hess_crab_spectrum( 10**(logE),fraction=0.01 ), 
+    plt.semilogy( log_e, 
+                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.01 ), 
                   linestyle=":", color='gray',
                   label=" 1% Crab" )
     
 
 
 
-def plot_sensitivity_crabunits( sens ):
+def plot_sensitivity_crabunits( log_e, sens ):
     """
     display the sensitivity curve as a fraction of the crab flux.
     
@@ -295,14 +305,14 @@ def plot_sensitivity_crabunits( sens ):
     :param sens: output dictionary from calc_sensitivity()
     """
 
-    logE = 0.5*(sens['log_e_hi']+sens['log_e_lo'])
+    
     sensitivity = sens['sensitivity']
     par = sens['params']
 
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
-    crabs = spectra.hess_crab_spectrum( 10**logE )
-    plt.plot( logE, sensitivity/crabs, label=label )
+    crabs = spectra.hess_crab_spectrum( 10**log_e )
+    plt.plot( log_e, sensitivity/crabs, label=label )
     plt.xlabel("log10(E/TeV)")
     plt.ylabel("Diff Sensitivity (Crab Units)")
 
