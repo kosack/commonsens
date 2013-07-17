@@ -4,7 +4,7 @@ sliders to adjust the parameters
 """
 
 from gammasens import *
-from gammasens.sensitivity import calc_sensitivity,plot_sensitivity_crabunits
+from gammasens.sensitivity import calc_sensitivity_from_distributions,plot_sensitivity_crabunits
 
 from astropy import units
 from pylab import *
@@ -50,12 +50,15 @@ if __name__ == '__main__':
         min_events = slider_minevents.val
         sca(ax)
         ax.clear()
-        out = calc_sensitivity( "thomas", gammas, electrons,  protons, 
-                                obstime=obstime_hrs*units.h,
-                                min_sys_pct=min_sys_pct,
-                                min_signif=min_signif,
-                                min_events=min_events)
-        plot_sensitivity_crabunits( out  ) 
+        out = calc_sensitivity_from_distributions( "thomas", 
+                                                   gammas, 
+                                                   electrons,  
+                                                   protons, 
+                                                   obstime=obstime_hrs*units.h,
+                                                   min_sys_pct=min_sys_pct,
+                                                   min_signif=min_signif,
+                                                   min_events=min_events)
+        plot_sensitivity_crabunits( gammas.log_e, out  ) 
         ylim( 0.01, 1.1 )
         grid()
         draw()

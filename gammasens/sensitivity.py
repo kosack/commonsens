@@ -102,6 +102,25 @@ def calc_background_rate(gammas, electrons, protons, return_all=False):
     return (re+rp)
 
 
+def calc_sensitivity_from_distributions( name, gammas, electrons, protons,  
+                                         **kwargs ):
+    """
+    
+    Arguments:
+    - `name`:
+    - `gammas`:
+    - `electrons`:
+    - `protons`:
+    
+    """
+    
+    background_rate = calc_background_rate( gammas, electrons,protons)
+    gamma_aeff_reco = gammas.effective_area_reco()
+    delta_e = gammas.deltaE
+
+    return calc_sensitivity( name, background_rate, gamma_aeff_reco, 
+                             delta_e, **kwargs)
+
 def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
                      obstime=5*units.h, 
                      num_bg_regions=2, min_signif=5.0, min_events=10.0, 
