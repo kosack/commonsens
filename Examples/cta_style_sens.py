@@ -26,15 +26,22 @@ for obstime in [0.5,50]*units.h:
 
 
 
-gs.sensitivity.plot_crab( log_e )
-
+# plot the sensitivity calculated by this script, and overlay the
+# precalculated one (note that the CTA sensitiity is in E^2 units)gs.sensitivity.plot_crab( log_e )
 E = 10**log_e * units.TeV
 presens = (precalc_sens/E**2).to("1/(cm**2 s TeV)")
-plt.plot( log_e, presens, linewidth=4, linestyle="--", label="precalculated" )
-
-
+plt.plot( log_e, presens, linewidth=4, linestyle="--", color="red", alpha=0.5,
+          label="precalculated")
 plt.legend()
 plt.grid()
+
+# display residuals
+plt.figure()
+plt.scatter( log_e, sens.sensitivity/units.ct - presens)
+plt.title("Residuals between CTA and this calculation")
+plt.xlabel("Log10(E_reco)")
+plt.grid()
+
 
 
 
