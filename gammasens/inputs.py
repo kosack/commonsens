@@ -337,14 +337,24 @@ def load_cta_response(filename):
     pre-processed (e.g. background rate is already calculated). This
     is included for comparing older CTA sensitivity output to those
     calculated with ParticleDistributions
+    
+    Assumes the text file has the columns:
+    * 0: log10(E) at the bin center (TeV)
+    * 1: A_eff for gammas, after all cuts  (m^2)
+    * 2-4: r28,r80,Eres (not used)
+    * 5: background rate post-cuts, and inside source region (Hz)
+    * 6: differential sensitivity pre-calculated, E^2 dN/dE (erg/cm^2/s)
     """
     AA = np.loadtxt(filename)
     log_e = AA[:,0]
-    delta_log_e = log_e[1]-log_e[0]
-    delta_e = 10**(np.ones_like(AA[:,0]) * delta_log_e)
+    dloge = log_e[1]-log_e[0]
+
+    log_e_lo = log_e - dloge/2.0
+    log_e_hi = log_e + dloge/2.0
+
     sens = AA[:,6]
 
-    return (log_e, delta_e * units.TeV, AA[:,1] *units.m**2,
+    return (log_e_lo, log_e_hi, AA[:,1] *units.m**2,
             AA[:,5] * units.count/units.s, 
             units.Quantity(AA[:,6],"erg/(cm**2 s)") )
     

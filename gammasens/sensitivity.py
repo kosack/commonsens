@@ -17,6 +17,13 @@ from gammasens import spectra
 EPSILON = 1.0e-10
 PSTY = {'linestyle':'steps-mid', 'linewidth':2} # default line style    
 
+class SensOutput(dict):
+    """ just a dict that allows tab completion in ipython """
+    def __init__(self,**kw):
+        dict.__init__(self,kw)
+        self.__dict__ = self
+
+
 
 def solid_angle( theta ):
     """
@@ -181,13 +188,18 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
     N_on_orig = N_on.copy()
     mask = excess(N_on,N_off,alpha)<min_events
     if any(mask):
+#        print "EXC:",len(mask)
+#        print excess(N_on,N_off,alpha)[mask]
         N_on[mask] = min_events + alpha[mask]*N_off[mask]
+#        print excess(N_on,N_off,alpha)[mask]
 
     # apply conditions on minimum background systematics
     mask = excess(N_on,N_off,alpha)<N_off*min_sys_pct*0.01
     if any(mask):
+#        print "SYS:",len(mask)
+#        print excess(N_on,N_off,alpha)[mask]
         N_on[mask] = N_off[mask]*min_sys_pct*0.01 + alpha[mask]*N_off[mask]
-           
+#        print excess(N_on,N_off,alpha)[mask]
     
     # calculate sensitivity limit, and conver to proper units 
     N_on[np.isnan(N_off)] = np.nan  #chop off bad values
@@ -204,7 +216,7 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
 
     # return all the output (including intermediate values) in a dict,
     # for later plotting
-    return dict( params=dict(obstime=obstime,
+    return SensOutput( params=dict(obstime=obstime,
                               num_bg_regions = num_bg_regions,
                               min_signif=min_signif,
                               min_events=min_events,
@@ -270,17 +282,21 @@ def plot_rates( log_e, rate_p, rate_e, sens ):
     plt.xlabel("log E$_{reco}$/TeV")
     plt.legend( loc="best")
 
-def plot_sensitivity(log_e, sens, **kwargs):
+def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
     """
     Display the differential sensitivity curve 
 
     :param sens: sensitivity output dictrionary
     """
 
+    E = 10**log_e * units.TeV
     
     sensitivity = sens['sensitivity']
-    par = sens['params']
 
+    if (esquared):
+        sensitivity *= E**2
+
+    par = sens['params']
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
