@@ -1,6 +1,12 @@
 Sensititivity calculations from CTA Prod-1 from K. Bernloehr, in
 old-style CTA format (pre-calculated background rates)
 
+These were preliminary sensitivities for CTA and are no longer valid
+or useful for any science results, however they work well for
+verifying the calculations.
+
+
+
 Columns:
 
 log(E) Area   r68  r80  ERes. BG Rate  Diff Sens
