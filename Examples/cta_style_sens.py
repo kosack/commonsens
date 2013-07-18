@@ -2,7 +2,7 @@ from astropy import units
 import gammasens as gs
 from matplotlib import pyplot as plt
 
-respdir = "/Users/kosack/Source/Working/astrophysics/responses/CTA/"
+respdir = "../Data/CTA-Prod1-Bernloehr/"
 respfile="kb_E_0.5h_20deg_v3.dat.txt"
 #respfile ="kb_E_50h_50deg_v3.dat.txt"
 
