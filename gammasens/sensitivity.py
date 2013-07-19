@@ -19,7 +19,10 @@ EPSILON = 1.0e-10
 PSTY = {'linestyle':'steps-mid', 'linewidth':2} # default line style    
 
 class SensOutput(dict):
-    """ just a dict that allows tab completion in ipython """
+    """
+    a dict that allows tab completion in ipython, and access to
+    data members using instance.key=value notation
+    """
     def __init__(self,**kw):
         dict.__init__(self,kw)
         self.__dict__ = self
