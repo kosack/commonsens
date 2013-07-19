@@ -20,6 +20,7 @@ The code is broken into several modules:
    sensitivity
    inputs
    spectra
+   stats
    format
 
 

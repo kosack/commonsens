@@ -36,7 +36,8 @@ if __name__ == '__main__':
     axcolor = 'lightgoldenrodyellow'
 
     ax_obstime = axes([0.25, 0.11, 0.65, 0.03], axisbg=axcolor)
-    slider_obstime= Slider(ax_obstime, 'Time (h)', 0.0, 100.0, valinit=obstime_hrs)
+    slider_obstime= Slider(ax_obstime, 'Time (h)', 0.0, 100.0, 
+                           valinit=obstime_hrs)
 
     ax_syspct = axes([0.25, 0.16, 0.65, 0.03], axisbg=axcolor)
     slider_syspct= Slider(ax_syspct, 'Systematics (%)', 0.0, 100.0, 

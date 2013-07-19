@@ -12,6 +12,7 @@ from scipy import optimize
 
 from gammasens import inputs
 from gammasens import spectra
+from gammasens import stats
 
 
 EPSILON = 1.0e-10
@@ -36,49 +37,15 @@ def solid_angle( theta ):
     # return (1.0-np.cos(theta.to(units.rad)))*2.0*np.pi*units.steradian
 
 
-@np.vectorize
-def signif_lima(n_on,n_off,alpha):
-    """
-    Li and Ma significance formula 
-
-    :param N_on: number of on-source counts
-    :param N_off: nuber of off-source counts
-    :param alpha: ratio of on/off exposure
-
-    TODO: could speed this up by making it a true vector function, and not using
-    vectorize (would need to change the logic a bit to use only numpy ufuncs)
-    """
-    thesum = n_on + n_off + EPSILON
-    arg1 = (1.0+alpha)/alpha * ( n_on/thesum)
-    arg2 = (1.0+alpha)*(n_off/thesum)
-
-    if (alpha*n_off > n_on):
-        return (n_on-alpha*n_off)/np.sqrt(alpha*thesum)
-    
-    
-    if arg1 > 1e-10 and arg2 > 1e-10:
-        sigsqr = np.fabs(2.0*(n_on*np.log(arg1) + n_off*np.log(arg2)))
-    else:
-        if  thesum > 1.0e-5 :
-            return (n_on-alpha*n_off)/np.sqrt(alpha*thesum)
-        else :
-            return 0.0
-    if ((n_on - alpha*n_off) > 0.0):
-        return np.sqrt(sigsqr)
-    else:
-        return -np.sqrt(sigsqr)
 
 
 def residual_signif(N_on, N_off, alpha, minsig):
     """
     used my minimization routine to invert the Li and Ma formula
     """
-    return minsig - signif_lima( N_on, N_off, alpha)
+    return minsig - stats.signif_lima( N_on, N_off, alpha)
 
 
-def excess(N_on, N_off, alpha):
-    """ return excess counts given on, off, and exposure ratio """
-    return (N_on - alpha*N_off)
 
 
 def calc_background_rate(gammas, electrons, protons, return_all=False):
@@ -186,24 +153,18 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
 
     # apply conditions on minimum excess
     N_on_orig = N_on.copy()
-    mask = excess(N_on,N_off,alpha)<min_events
+    mask = stats.excess(N_on,N_off,alpha)<min_events
     if any(mask):
-#        print "EXC:",len(mask)
-#        print excess(N_on,N_off,alpha)[mask]
         N_on[mask] = min_events + alpha[mask]*N_off[mask]
-#        print excess(N_on,N_off,alpha)[mask]
 
     # apply conditions on minimum background systematics
-    mask = excess(N_on,N_off,alpha)<N_off*min_sys_pct*0.01
+    mask = stats.excess(N_on,N_off,alpha)<N_off*min_sys_pct*0.01
     if any(mask):
-#        print "SYS:",len(mask)
-#        print excess(N_on,N_off,alpha)[mask]
         N_on[mask] = N_off[mask]*min_sys_pct*0.01 + alpha[mask]*N_off[mask]
-#        print excess(N_on,N_off,alpha)[mask]
     
     # calculate sensitivity limit, and conver to proper units 
     N_on[np.isnan(N_off)] = np.nan  #chop off bad values
-    sens = excess(N_on,N_off,alpha)*units.count \
+    sens = stats.excess(N_on,N_off,alpha)*units.count \
            /gamma_aeff_reco/obstime/delta_e
 
     sens = sens.to("ct cm**-2 s**-1 TeV**-1")
@@ -245,7 +206,7 @@ def plot_count_distributions( log_e, sens ):
 
     plt.semilogy( log_e, sens['N_on'], label="N_on", **PSTY  )
     plt.semilogy( log_e, sens['N_off'], color='r', label="N_off", **PSTY )
-    plt.semilogy( log_e, excess(sens['N_on'],sens['N_off'],sens['alpha']), 
+    plt.semilogy( log_e, stats.excess(sens['N_on'],sens['N_off'],sens['alpha']), 
                   color='black', label="N_exc", **PSTY )
     plt.ylabel("Counts ({0})".format(sens['params']['obstime']))
     plt.xlabel("Log10(E/TeV)")
@@ -255,10 +216,10 @@ def plot_count_distributions( log_e, sens ):
 def plot_significances( log_e, sens ):
     """ sens: output dictionary from calc_sensitivity """ 
 
-    plt.scatter( log_e, signif_lima( sens['N_on'], sens['N_off'], 
-                                    sens['alpha'] ) )
-    plt.scatter( log_e, signif_lima( sens['N_on_orig'], sens['N_off'], 
-                                    sens['alpha'] ),
+    plt.scatter( log_e, stats.signif_lima( sens['N_on'], sens['N_off'], 
+                                           sens['alpha'] ) )
+    plt.scatter( log_e, stats.signif_lima( sens['N_on_orig'], sens['N_off'], 
+                                           sens['alpha'] ),
                  color='grey' )
     plt.ylabel("Significance")
     plt.xlabel("Log10(E/TeV)")
@@ -270,7 +231,8 @@ def plot_rates( log_e, rate_p, rate_e, sens ):
     plt.semilogy( log_e, rate_e,label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
-    excess_rate = excess(sens['N_on'],sens['N_off'],sens['alpha'])*units.ct \
+    excess_rate = stats.excess(sens['N_on'],sens['N_off'],
+                               sens['alpha'])*units.ct \
                   / sens['params']['obstime']
 
     plt.semilogy( log_e, excess_rate.to(units.ct/units.s),

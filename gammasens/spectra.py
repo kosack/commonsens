@@ -40,7 +40,7 @@ def electron_spectrum_powerlaw(e_true_tev):
 
 def electron_spectrum_fermi(e_true_tev, E_peak_tev=0.107, width=0.776):
     """ cosmic ray electron spectrum including Fermi shoulder 
-    units of :math:`\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}
+    units of :math:`\\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}`
     """
 
     # including Fermi shoulder: powerlaw plus lognormal
@@ -57,10 +57,10 @@ def proton_spectrum(e_true_tev):
     """returns cosmic-ray proton spectrum 
 
     .. math::
-        {dN \over dE dA dt d\Omega} = 0.096 ({E_t \over TeV})^{-2.7}
+        {dN \over dE dA dt d\Omega} = 0.096 \\left({E_t \over TeV}\\right)^{-2.7}
    
 
-    in units of :math:`\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}`
+    in units of :math::`\\mathrm{TeV^{-1} s^{-1} m^{-2} sr^{-1}}`
     """
 
     norm = units.Quantity(0.096,"TeV**-1 s**-1 m**-2 sr**-1")
