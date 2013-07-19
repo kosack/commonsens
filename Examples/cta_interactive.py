@@ -64,6 +64,7 @@ if __name__ == '__main__':
                                 min_sys_pct=min_sys_pct,
                                 min_signif=min_signif,
                                 min_events=min_events)
+        semilogy()
         plot_sensitivity_crabunits( log_e, out  ) 
         ylim( 0.0, 1.1 )
         grid()
