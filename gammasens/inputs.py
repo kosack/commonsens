@@ -153,7 +153,11 @@ class ParticleDistribution(object):
 
         return dist
 
-    def migrateToEreco(self, value ):
+    def _migrateToEreco(self, value ):
+        """
+        apply energy migration to go from true to reconstructed energy on
+        the x-axis
+        """
         if self._energy_migration_method == "shifted":
             return shifted_energy_migration( self.log_e, value,
                                              self._migration_function) 
@@ -170,11 +174,14 @@ class ParticleDistribution(object):
 
     @property
     def n_simulated_reco(self):
-        return self.migrateToEreco( self.n_simulated )
+        return self._migrateToEreco( self.n_simulated )
 
     @property
     def dnde_reco(self):
-        return self.dnde_true.unit * self.migrateToEreco( self.dnde_true.value )
+        """return :math:`dN/dE_{reco}` using the energy migration function or
+        matrix
+        """
+        return self.dnde_true.unit * self._migrateToEreco( self.dnde_true.value )
 
     def setSpectrum(self, specfunc):
         """
