@@ -25,6 +25,10 @@ class SensOutput(dict):
         self.__dict__ = self
 
 
+def xlabel_energy():
+    """ add the x-label for Energy in nive format """
+    plt.xlabel(r"$\log_{10}(E_{reco}/\mathrm{TeV})$")
+
 
 def solid_angle( theta ):
     """
@@ -198,7 +202,7 @@ def plot_effareas( gammas, electrons, protons ):
     plt.semilogy( gammas.log_e, gammas.effective_area_reco(), 
                   label=r"$\gamma$", **PSTY)
     plt.ylabel("Effective Area (m)")
-    plt.xlabel("log E$_{reco}$/TeV")
+    xlabel_energy()
     plt.legend(loc="best")
 
 
@@ -209,7 +213,7 @@ def plot_count_distributions( log_e, sens ):
     plt.semilogy( log_e, stats.excess(sens['N_on'],sens['N_off'],sens['alpha']), 
                   color='black', label="N_exc", **PSTY )
     plt.ylabel("Counts ({0})".format(sens['params']['obstime']))
-    plt.xlabel("Log10(E/TeV)")
+    xlabel_energy()
     plt.legend(loc='best')
 
 
@@ -222,7 +226,7 @@ def plot_significances( log_e, sens ):
                                            sens['alpha'] ),
                  color='grey' )
     plt.ylabel("Significance")
-    plt.xlabel("Log10(E/TeV)")
+    xlabel_energy()
     plt.legend(loc='best')
 
 
@@ -241,7 +245,7 @@ def plot_rates( log_e, rate_p, rate_e, sens ):
 
 
     plt.ylabel("Rate ({0})".format(rate_p.unit.to_string()) )
-    plt.xlabel("log E$_{reco}$/TeV")
+    xlabel_energy()
     plt.legend( loc="best")
 
 def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
@@ -265,7 +269,8 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
     lines = plt.semilogy( log_e, sensitivity.value, marker="+",
                           label=label,**kwargs )
     plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
-    plt.xlabel("log E$_{reco}$/TeV")
+    xlabel_energy()
+
     plt.title("Differential Sensitivity")
     plt.ylim(1e-14, 1e-5)
     return lines
@@ -310,7 +315,7 @@ def plot_sensitivity_crabunits( log_e, sens ):
                                              par['min_signif'], sens['name'])
     crabs = spectra.hess_crab_spectrum( 10**log_e )
     plt.plot( log_e, sensitivity/crabs, label=label )
-    plt.xlabel("log10(E/TeV)")
+    xlabel_energy()
     plt.ylabel("Diff Sensitivity (Crab Units)")
 
 if __name__ == '__main__':
