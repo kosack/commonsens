@@ -1,8 +1,9 @@
 from distutils.core import setup
 import sys
+from gammasens import __version__
 
 setup(name='gammasens',
-      version='1.0-r1',
+      version=str(__version__),
       author='Karl Kosack',
       author_email='karl.kosack@cea.fr',
 #      url='',

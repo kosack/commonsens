@@ -14,7 +14,7 @@ EPSILON = 1.0e-10
 
 def signif_lima_scalar(n_on,n_off,alpha):
     """Li and Ma significance formula, with scalar inputs.
-    use the version called signif_lima, which is vectorized
+    use the version called signif_lima(), which is vectorized
 
     :param N_on: number of on-source counts
     :param N_off: nuber of off-source counts
