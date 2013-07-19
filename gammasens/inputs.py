@@ -33,6 +33,21 @@ from astropy import units
 
 from gammasens import spectra
 
+
+def normalize_to_prob(x):
+    """
+    Makes x a probability distribution 
+    
+    Arguments:
+    - `x`: array-like
+
+    >>> np.apply_along_axis( normalize_to_prob, arr=migmatrix, axis=1)
+
+    """
+    x[x>0] /= np.sum(x)
+    return x
+
+
 def shifted_energy_migration(log_e_true, value, migration_function):
     """very simplistic energy migration (doesn't take into account any
     spread in the energy, just the bias. Returns an array of value as
@@ -258,7 +273,7 @@ class ParticleDistribution(object):
                       drawstyle='steps-mid')
         plt.xlabel("log10(E/TeV)")
         plt.ylabel("N (counts)")
-        plt.legend(loc="best")
+        plt.legend(loc="best", fontsize="small")
 
         # plot the energy migration matrix + the simple energy
         # migration function + the e_bias given in the data file to
@@ -274,6 +289,7 @@ class ParticleDistribution(object):
                  color="red", lw=3, ls="--")
         plt.xlabel("log_e_true")
         plt.ylabel("log_e_reco")
+        plt.colorbar()
 
     @classmethod
     def fromFITS(cls, name, filename):
@@ -301,6 +317,10 @@ class ParticleDistribution(object):
         part.e_bias = sens.data.field("E_bias") * units.TeV
         part.e_res = sens.data.field("e_res")  * units.TeV
         part.e_mig =  sens.data.field("E_migration") 
+
+        # normalize the migration matrix to be a probability:
+        # TODO: which axis? along E_true or E_reco?
+        np.apply_along_axis( normalize_to_prob, arr=part.e_mig, axis=1)
 
         return part
 
