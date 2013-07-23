@@ -27,11 +27,19 @@ __all__ = ['ParticleDistribution','loadAllFromFITS']
 import numpy as np
 from matplotlib import pyplot as plt
 from math import pi
-from scipy.interpolate import RectBivariateSpline, InterpolatedUnivariateSpline
+from scipy.interpolate import RectBivariateSpline, interp1d
 from astropy.io import fits
 from astropy import units
 
 from gammasens import spectra
+
+
+def extrap(x, xp, yp):
+    """np.interp function with linear extrapolation"""
+    y = np.interp(x, xp, yp, kind="linear", bounds_error=False)
+    y[x < xp[0]] = yp[0] + (x[x<xp[0]]-xp[0]) * (yp[0]-yp[1]) / (xp[0]-xp[1])
+    y[x > xp[-1]]= yp[-1] + (x[x>xp[-1]]-xp[-1])*(yp[-1]-yp[-2])/(xp[-1]-xp[-2])
+    return y
 
 
 def normalize_to_prob(x):
@@ -59,7 +67,8 @@ def shifted_energy_migration(log_e_true, value, migration_function):
 
     """
     
-    func = InterpolatedUnivariateSpline( log_e_true, value )
+    func = interp1d( log_e_true, value, kind="linear", 
+                     bounds_error=False, fill_value=0)
     log_ereco = np.log10( migration_function( 10**log_e_true ) )
     return func(log_ereco)
 
@@ -115,7 +124,8 @@ class ParticleDistribution(object):
 
     def _resample(self, newlog_e, values ):
         """ resample values to new bin centers """
-        spline =  InterpolatedUnivariateSpline( self.log_e, values )
+        spline =  interp1d( self.log_e, values, kind="linear",
+                            bounds_error=False, fill_value=0 )  
         return spline( newlog_e )
 
 
