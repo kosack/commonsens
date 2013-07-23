@@ -113,8 +113,6 @@ class ParticleDistribution(object):
         self.n_simulated = None #: counts simulated per E_true bin
         self.r_simulated = None #: radius of simulation per E_true bin
         self.phi_diffuse = None #: diffuse simulation cone angle 
-        self.e_res = None #: energy resolution 
-        self.e_bias = None #: energy bias
         self.e_mig = None #: 2D energy migration matrix (E_true vs E_reco)
         self.r68_psf = None #: 68% containment radius of PSF
 
@@ -292,8 +290,8 @@ class ParticleDistribution(object):
         plt.subplot(1,2,2)
         plt.title("Energy Migration")
         plt.pcolormesh(self.log_e_lo, self.log_e_lo, self.e_mig.T)
-        plt.errorbar( self.log_e, np.log10(10**self.log_e + self.e_bias), 
-                      self.e_res, color='w', lw=3 )
+        # plt.errorbar( self.log_e, np.log10(10**self.log_e + self.e_bias), 
+        #               self.e_res, color='w', lw=3 )
         plt.plot(self.log_e, 
                  np.log10(self._migration_function(10**self.log_e)),
                  color="red", lw=3, ls="--")
@@ -324,8 +322,6 @@ class ParticleDistribution(object):
         part.thetasqr = sens.data.field("ThetaSqr") * units.deg
         part.phi_diffuse = sens.data.field("phi_diffuse") * units.deg
         part.r68_psf = sens.data.field("R68_psf") * units.meter
-        part.e_bias = sens.data.field("E_bias") * units.TeV
-        part.e_res = sens.data.field("e_res")  * units.TeV
         part.e_mig =  sens.data.field("E_migration") 
 
         # normalize the migration matrix to be a probability:
