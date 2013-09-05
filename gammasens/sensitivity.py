@@ -264,6 +264,7 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
 
     if (esquared):
         sensitivity *= E**2
+        sensitivity = sensitivity.to(units.ct*units.erg/units.cm**2/units.s)
 
     par = sens['params']
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
