@@ -1,4 +1,4 @@
-"""
+"""norm_energy
 Set of particle spectral functions for use when calculating
 background and source rates
 """

@@ -125,8 +125,14 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
 
     """
 
-    # avoid constant warnings about quantity conversions 
-    units.quantity.WARN_IMPLICIT_NUMERIC_CONVERSION.set(False)
+
+    isintegral = False
+    try:
+        test = background_rate.to("ct * s**-1 * TeV")
+        isintegral = True
+    except units.UnitsError:
+        isintegral=False
+
 
     if verbose:
         print "CALCULATING SENSITIVITY FOR '{0}':".format(name)
@@ -136,11 +142,12 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
         print "       min_signif: ", min_signif
         print "       min_events: ", min_events
         print "      min_sys_pct: ", min_sys_pct,"%"
-
+        print "         integral: ", isintegral
     
     # now calculate number of BG events in each energy bin:
     N_bg = background_rate * obstime.to(units.s)
-    N_bg = N_bg.to(units.count).value
+    N_bg_unit = N_bg.unit
+    N_bg = N_bg.value
 
     alpha = np.ones(N_bg.shape) / num_bg_regions
     N_off = N_bg * num_bg_regions
@@ -171,10 +178,10 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
     
     # calculate sensitivity limit, and conver to proper units 
     N_on[np.isnan(N_off)] = np.nan  #chop off bad values
-    sens = stats.excess(N_on,N_off,alpha)*units.count \
+    sens = stats.excess(N_on,N_off,alpha)*N_bg_unit \
            /gamma_aeff_reco/obstime/delta_e
 
-    sens = sens.to("ct cm**-2 s**-1 TeV**-1")
+#    sens = sens.to("ct cm**-2 s**-1 TeV**-1")
 
     # if verbose:
     #     print "#logE_lo  logE_hi  Sensitivity",sens.unit
@@ -195,6 +202,31 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
                  N_on_orig = N_on_orig,
                  N_off = N_off,
                  alpha = alpha )
+
+def calc_integral_sensitivity(name, background_rate, 
+                              gamma_aeff_reco, delta_e,
+                              obstime=5*units.h, 
+                              num_bg_regions=2, min_signif=5.0, min_events=10.0, 
+                              min_sys_pct=5.0, verbose=False):
+    """
+    not yet working
+    """
+    
+    bgrate_e = (background_rate).value
+    int_bgrate = np.cumsum(bgrate_e[::-1])[::-1]*units.ct/units.s
+
+    aeff_e =(gamma_aeff_reco).value
+    int_aeff = np.cumsum( aeff_e[::-1] )[::-1]*units.erg*units.cm**2
+
+    de = delta_e.to(units.TeV).value
+    int_delta_e = np.cumsum( de[::-1] )[::-1]*units.TeV
+
+
+    return calc_sensitivity( name, int_bgrate, int_aeff, int_delta_e,
+                             obstime=obstime, num_bg_regions=num_bg_regions,
+                             min_signif=min_signif, min_events=min_events,
+                             min_sys_pct=min_sys_pct, verbose=verbose )
+
 
 def plot_effareas( gammas, electrons, protons ):
 
@@ -260,7 +292,7 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
 
     E = 10**log_e * units.TeV
     
-    sensitivity = sens['sensitivity']
+    sensitivity = sens['sensitivity'].to(units.ct/units.cm**2/units.s/units.TeV)
 
     if (esquared):
         sensitivity *= E**2
@@ -270,8 +302,8 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
-    lines = plt.semilogy( log_e, sensitivity.value, marker="+",
-                          label=label,**kwargs )
+    lines = plt.semilogy( log_e, sensitivity.value, marker=None,
+                          label=label, drawstyle="steps-mid",**kwargs )
     plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
     xlabel_energy()
 
@@ -279,22 +311,31 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
     plt.ylim(1e-14, 1e-5)
     return lines
 
-def plot_crab( log_e ):
+def plot_crab( log_e, esquared=False ):
     """ call after plot_sensitivity() to overplot Crab flux 
     """
 
+
+    crab = spectra.hess_crab_spectrum( 10**(log_e) )
+
+    if (esquared):
+        E = 10**log_e * units.TeV
+        crab = (crab*E**2).to(units.ct*units.erg/units.cm**2/units.s) 
+
+
+
     plt.semilogy( log_e, 
-                  spectra.hess_crab_spectrum( 10**(log_e) ), 
+                  crab.value * 1.0, 
                   linestyle="--", color='black',
                   label="100% Crab")
     
     plt.semilogy( log_e, 
-                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.1 ), 
+                  crab.value * 0.1, 
                   linestyle="--", color='gray',
                   label="10% Crab" )
     
     plt.semilogy( log_e, 
-                  spectra.hess_crab_spectrum( 10**(log_e),fraction=0.01 ), 
+                  crab.value * 0.01, 
                   linestyle=":", color='gray',
                   label=" 1% Crab" )
     
