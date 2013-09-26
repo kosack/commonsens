@@ -98,7 +98,7 @@ def calc_sensitivity_from_distributions( name, gammas, electrons, protons,
     
     background_rate = calc_background_rate( gammas, electrons,protons)
     gamma_aeff_reco = gammas.effective_area_reco()
-    delta_e = gammas.deltaE
+    delta_e = gammas.delta_e
 
     return calc_sensitivity( name, background_rate, gamma_aeff_reco, 
                              delta_e, **kwargs)
@@ -230,13 +230,14 @@ def calc_integral_sensitivity(name, background_rate,
 
 def plot_effareas( gammas, electrons, protons ):
 
-    plt.semilogy( protons.log_e, protons.effective_area_reco(), 
-                  label="p", **PSTY)
-    plt.semilogy( electrons.log_e, electrons.effective_area_reco(), 
-                  label="e-", **PSTY )
-    plt.semilogy( gammas.log_e, gammas.effective_area_reco(), 
-                  label=r"$\gamma$", **PSTY)
-    plt.ylabel("Effective Area (m)")
+    aeff_e = protons.effective_area_reco().to(units.m**2).value
+    aeff_p = electrons.effective_area_reco().to(units.m**2).value
+    aeff_g = gammas.effective_area_reco().to(units.m**2).value
+
+    plt.semilogy( protons.log_e, aeff_p, label="p", **PSTY)
+    plt.semilogy( electrons.log_e, aeff_e, label="e-", **PSTY )
+    plt.semilogy( gammas.log_e, aeff_g, label=r"$\gamma$", **PSTY)
+    plt.ylabel("Effective Area (m$^2$)")
     xlabel_energy()
     plt.legend(loc="best")
 
@@ -266,15 +267,15 @@ def plot_significances( log_e, sens ):
 
 
 def plot_rates( log_e, rate_p, rate_e, sens ):
-    plt.semilogy( log_e, rate_p,label="p ", **PSTY)
-    plt.semilogy( log_e, rate_e,label="e- ",**PSTY)
+    plt.semilogy( log_e, rate_p.to("ct s^-1").value,label="p ", **PSTY)
+    plt.semilogy( log_e, rate_e.to("ct s^-1").value ,label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
     excess_rate = stats.excess(sens['N_on'],sens['N_off'],
                                sens['alpha'])*units.ct \
                   / sens['params']['obstime']
 
-    plt.semilogy( log_e, excess_rate.to(units.ct/units.s),
+    plt.semilogy( log_e, excess_rate.to(units.ct/units.s).value,
                   label=r"$\gamma_\mathrm{exc}$",color='g', 
                   drawstyle='steps-mid', linestyle='--'  )
 
@@ -359,13 +360,13 @@ def plot_sensitivity_crabunits( log_e, sens ):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
     crabs = spectra.hess_crab_spectrum( 10**log_e )
-    plt.plot( log_e, sensitivity/crabs, label=label )
+    plt.plot( log_e, (sensitivity/crabs).value, label=label )
     xlabel_energy()
     plt.ylabel("Diff Sensitivity (Crab Units)")
 
 if __name__ == '__main__':
 
-    gammas, electrons, protons = inputs.loadAllFromFITS( "test-*.fits" )
+    gammas, electrons, protons = inputs.load_all_from_fits( "test-*.fits" )
     sens = calc_sensitivity( gammas, electrons, protons )
 
 

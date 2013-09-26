@@ -7,13 +7,13 @@ if __name__ == '__main__':
 
     # load the example files
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
-    gammas,electrons,protons = gs.inputs.loadAllFromFITS(filepat)
+    gammas,electrons,protons = gs.inputs.load_all_from_fits(filepat)
     bgrate,rate_p,rate_e = gs.sensitivity.calc_background_rate( gammas, 
                                                                 electrons, 
                                                                 protons, 
                                                                 return_all=True)
     gamma_aeff = gammas.effective_area_reco()
-    deltaE = gammas.deltaE
+    deltaE = gammas.delta_e
 
 
     # make sensitivity plot for several parameters:

@@ -6,13 +6,13 @@ the sensitivity calculation.
 ParticleDistributions may be constructed from compatible FITS files
 using the fromFITS() constructor.  They may also be resampled to a new binning.
 
->>> gammas = ParticleDistribution.fromFITS( "gammas", "mysens-gammas.fits" )
+>>> gammas = ParticleDistribution.from_fits( "gammas", "mysens-gammas.fits" )
 >>> gammas.plot()  # show some debugging info
 
 you can load gammas,electrons, and protons at once, and set some
 default values if you have named your files appropriately. Use:
 
->>> gammas,electrons,protons = loadAllFromFITS( "MyAnalysis", "mysens-*.fits")
+>>> gammas,electrons,protons = load_all_from_fits( "MyAnalysis", "mysens-*.fits")
 
 
 Code Documentation:
@@ -22,7 +22,7 @@ Code Documentation:
 
 """
 
-__all__ = ['ParticleDistribution','loadAllFromFITS']
+__all__ = ['ParticleDistribution', 'load_all_from_fits']
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -127,7 +127,7 @@ class ParticleDistribution(object):
         return spline( newlog_e )
 
 
-    def getResampledDistribution(self, log_e_min, log_e_max, nbins):
+    def resample(self, log_e_min, log_e_max, nbins):
         """
         returns new ParticleDistribution interpolated using splines to a
         new binning. Be careful to set the min and max in valid ranges
@@ -176,7 +176,7 @@ class ParticleDistribution(object):
 
         return dist
 
-    def _migrateToEreco(self, value ):
+    def _migrate_etrue_to_ereco(self, value ):
         """
         apply energy migration to go from true to reconstructed energy on
         the x-axis
@@ -197,16 +197,16 @@ class ParticleDistribution(object):
 
     @property
     def n_simulated_reco(self):
-        return self._migrateToEreco( self.n_simulated )
+        return self._migrate_etrue_to_ereco( self.n_simulated )
 
     @property
     def dnde_reco(self):
         """return :math:`dN/dE_{reco}` using the energy migration function or
         matrix
         """
-        return self.dnde_true.unit * self._migrateToEreco( self.dnde_true.value )
+        return self.dnde_true.unit * self._migrate_etrue_to_ereco( self.dnde_true.value )
 
-    def setSpectrum(self, specfunc):
+    def set_spectrum(self, specfunc):
         """
         Set the differential particle spectrum function (a mathematical
         function of E_true) for this particle species.  
@@ -237,11 +237,11 @@ class ParticleDistribution(object):
         #n_det = self.n_detected * self.thetasqr/(self.phi_diffuse)
         Aeff = (self.n_detected / self.n_simulated_reco) * pi \
                * self.r_simulated.to(units.m)**2
-        return Aeff * units.m**2
+        return Aeff
 
 
     @property
-    def deltaE(self):
+    def delta_e(self):
         """ energy bin widths (not log) """
         return (10**self.log_e_hi - 10**self.log_e_lo)*units.TeV
 
@@ -300,7 +300,7 @@ class ParticleDistribution(object):
         plt.colorbar()
 
     @classmethod
-    def fromFITS(cls, name, filename):
+    def from_fits(cls, name, filename):
         """
         Construct a ParticleDistribution from a FITS file that has a SENS
         extension
@@ -336,7 +336,7 @@ class ParticleDistribution(object):
 
 
 
-def loadAllFromFITS(filepattern, species = ['gamma','electron','proton']):
+def load_all_from_fits(filepattern, species = ['gamma','electron','proton']):
     """Load set of particle species (gammas, electrons, hadrons) assuming
     the files are named identically, but with the character "*"
     replaced with "gamma", "electron" or "proton" in the filename.
@@ -348,14 +348,14 @@ def loadAllFromFITS(filepattern, species = ['gamma','electron','proton']):
     dists = []
 
     for particle in species:
-        dist = ParticleDistribution.fromFITS(particle, 
+        dist = ParticleDistribution.from_fits(particle,
                                              filepattern.replace("*", particle))
         dists.append(dist)
 
 
     # set some defaults:
-    dists[1].setSpectrum( spectra.electron_spectrum )
-    dists[2].setSpectrum( spectra.cosmicray_spectrum )
+    dists[1].set_spectrum( spectra.electron_spectrum )
+    dists[2].set_spectrum( spectra.cosmicray_spectrum )
 
     # simplistic proton migration function used in CTA curves (just
     # based on branching ratio)

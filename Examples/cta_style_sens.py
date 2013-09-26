@@ -38,7 +38,8 @@ if __name__ == '__main__':
     # units)
     E = 10**log_e * units.TeV
     presens = (precalc_sens/E**2).to("1/(cm**2 s TeV)")
-    plt.plot( log_e, presens, linewidth=4, linestyle="--", 
+    plt.plot( log_e, presens.value, 
+              linewidth=4, linestyle="--", 
               color="red", alpha=0.5,
               label="precalculated")
     plt.legend()
