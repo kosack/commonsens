@@ -77,7 +77,7 @@ def cosmicray_spectrum(e_true_tev):
     return proton_spectrum(e_true_tev) * 1.1
 
 def hess_crab_spectrum(e_true_tev, fraction=1.0) :
-    norm = fraction*units.Quantity(3.76e-11, "ct cm**-2 s**-1 TeV**-1")
+    norm = fraction*units.Quantity(3.76e-11, "cm**-2 s**-1 TeV**-1")
     return  powerlaw( e_true_tev, norm=norm,
                       index=2.39, norm_energy=1.0) \
         * exponential_cutoff(e_true_tev, cutoff_energy=14.3)

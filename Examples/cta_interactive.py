@@ -53,6 +53,7 @@ if __name__ == '__main__':
 
 
     def update(val):
+        print "UPDATE"
         obstime_hrs = slider_obstime.val
         min_sys_pct = slider_syspct.val
         min_signif = slider_minsignif.val
@@ -70,6 +71,7 @@ if __name__ == '__main__':
         ylim( 0.0, 1.1 )
         grid()
         draw()
+        return out
 
 
     slider_obstime.on_changed(update)

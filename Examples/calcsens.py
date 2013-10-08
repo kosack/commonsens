@@ -19,10 +19,10 @@ if __name__ == '__main__':
     # make sensitivity plot for several parameters:
     plt.figure()
     for hours in [0.5,5,50]:
-        out = gs.sensitivity.calc_sensitivity( "thomas",
-                                               bgrate,gamma_aeff,deltaE,
-                                               obstime=hours*units.h)
-        gs.sensitivity.plot_sensitivity( gammas.log_e, out )
+        result = gs.sensitivity.calc_sensitivity( "thomas",
+                                                  bgrate,gamma_aeff,deltaE,
+                                                  obstime=hours*units.h)
+        gs.sensitivity.plot_sensitivity( gammas.log_e, result )
 
     gs.sensitivity.plot_crab( gammas.log_e ) # overlay Crab contours
     plt.legend(loc="best")
@@ -47,11 +47,11 @@ if __name__ == '__main__':
         plt.subplot(2,2,1)
         gs.sensitivity.plot_effareas( gammas, electrons, protons )
         plt.subplot(2,2,2)
-        gs.sensitivity.plot_count_distributions( gammas.log_e, out )
+        gs.sensitivity.plot_count_distributions( gammas.log_e, result )
         plt.subplot(2,2,3)
-        gs.sensitivity.plot_significances( gammas.log_e, out )
+        gs.sensitivity.plot_significances( gammas.log_e, result )
         plt.subplot(2,2,4)
-        gs.sensitivity.plot_rates( gammas.log_e, rate_p, rate_e, out )
+        gs.sensitivity.plot_rates( gammas.log_e, rate_p, rate_e, result )
         plt.gcf().suptitle("Intermediate Distributions")
 
     plt.show()

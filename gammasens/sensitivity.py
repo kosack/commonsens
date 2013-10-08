@@ -29,7 +29,7 @@ class SensOutput(dict):
 
 
 def xlabel_energy():
-    """ add the x-label for Energy in nive format """
+    """ add the x-label for Energy in nice format """
     plt.xlabel(r"$\log_{10}(E_{reco}/\mathrm{TeV})$")
 
 
@@ -128,7 +128,7 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
 
     isintegral = False
     try:
-        test = background_rate.to("ct * s**-1 * TeV")
+        test = background_rate.to("s**-1 * TeV")
         isintegral = True
     except units.UnitsError:
         isintegral=False
@@ -181,7 +181,7 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
     sens = stats.excess(N_on,N_off,alpha)*N_bg_unit \
            /gamma_aeff_reco/obstime/delta_e
 
-#    sens = sens.to("ct cm**-2 s**-1 TeV**-1")
+#    sens = sens.to("cm**-2 s**-1 TeV**-1")
 
     # if verbose:
     #     print "#logE_lo  logE_hi  Sensitivity",sens.unit
@@ -213,7 +213,7 @@ def calc_integral_sensitivity(name, background_rate,
     """
     
     bgrate_e = (background_rate).value
-    int_bgrate = np.cumsum(bgrate_e[::-1])[::-1]*units.ct/units.s
+    int_bgrate = np.cumsum(bgrate_e[::-1])[::-1]*1/units.s
 
     aeff_e =(gamma_aeff_reco).value
     int_aeff = np.cumsum( aeff_e[::-1] )[::-1]*units.erg*units.cm**2
@@ -267,15 +267,15 @@ def plot_significances( log_e, sens ):
 
 
 def plot_rates( log_e, rate_p, rate_e, sens ):
-    plt.semilogy( log_e, rate_p.to("ct s^-1").value,label="p ", **PSTY)
-    plt.semilogy( log_e, rate_e.to("ct s^-1").value ,label="e- ",**PSTY)
+    plt.semilogy( log_e, rate_p.to("s^-1").value,label="p ", **PSTY)
+    plt.semilogy( log_e, rate_e.to("s^-1").value ,label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
     excess_rate = stats.excess(sens['N_on'],sens['N_off'],
-                               sens['alpha'])*units.ct \
+                               sens['alpha']) \
                   / sens['params']['obstime']
 
-    plt.semilogy( log_e, excess_rate.to(units.ct/units.s).value,
+    plt.semilogy( log_e, excess_rate.to(1/units.s).value,
                   label=r"$\gamma_\mathrm{exc}$",color='g', 
                   drawstyle='steps-mid', linestyle='--'  )
 
@@ -293,18 +293,18 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
 
     E = 10**log_e * units.TeV
     
-    sensitivity = sens['sensitivity'].to(units.ct/units.cm**2/units.s/units.TeV)
+    sensitivity = sens['sensitivity'].to(1/units.cm**2/units.s/units.TeV)
 
     if (esquared):
         sensitivity *= E**2
-        sensitivity = sensitivity.to(units.ct*units.erg/units.cm**2/units.s)
+        sensitivity = sensitivity.to(units.erg/units.cm**2/units.s)
 
     par = sens['params']
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
     lines = plt.semilogy( log_e, sensitivity.value, marker=None,
-                          label=label, drawstyle="steps-mid",**kwargs )
+                          label=label, drawstyle="default",**kwargs )
     plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
     xlabel_energy()
 
@@ -321,7 +321,7 @@ def plot_crab( log_e, esquared=False ):
 
     if (esquared):
         E = 10**log_e * units.TeV
-        crab = (crab*E**2).to(units.ct*units.erg/units.cm**2/units.s) 
+        crab = (crab*E**2).to(units.erg/units.cm**2/units.s) 
 
 
 
@@ -360,7 +360,7 @@ def plot_sensitivity_crabunits( log_e, sens ):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
     crabs = spectra.hess_crab_spectrum( 10**log_e )
-    plt.plot( log_e, (sensitivity/crabs).value, label=label )
+    plt.plot( log_e, (sensitivity/crabs).to("").value, label=label )
     xlabel_energy()
     plt.ylabel("Diff Sensitivity (Crab Units)")
 

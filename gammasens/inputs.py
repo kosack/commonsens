@@ -204,7 +204,8 @@ class ParticleDistribution(object):
         """return :math:`dN/dE_{reco}` using the energy migration function or
         matrix
         """
-        return self.dnde_true.unit * self._migrate_etrue_to_ereco( self.dnde_true.value )
+        return self.dnde_true.unit \
+            * self._migrate_etrue_to_ereco( self.dnde_true.value )
 
     def set_spectrum(self, specfunc):
         """
@@ -257,7 +258,7 @@ class ParticleDistribution(object):
         # than use rectangle-rule approximation.  Or at least use
         # trapezoid rule... 
 
-        return units.count*self.effective_area_reco()*self.dnde_reco*deltaE
+        return self.effective_area_reco()*self.dnde_reco*deltaE
 
 
     def plot(self):
@@ -388,6 +389,6 @@ def load_cta_response(filename):
     sens = AA[:,6]
 
     return (log_e_lo, log_e_hi, AA[:,1] *units.m**2,
-            AA[:,5] * units.count/units.s, 
+            AA[:,5] * 1/units.s, 
             units.Quantity(AA[:,6],"erg/(cm**2 s)") )
     
