@@ -322,7 +322,7 @@ class ParticleDistribution(object):
         part.r_simulated = sens.data.field("r_simulated") * units.meter
         part.thetasqr = sens.data.field("ThetaSqr") * units.deg
         part.phi_diffuse = sens.data.field("phi_diffuse") * units.deg
-        part.r68_psf = sens.data.field("R68_psf") * units.meter
+#        part.r68_psf = sens.data.field("R68_psf") * units.meter
         part.e_mig =  sens.data.field("E_migration") 
 
         # normalize the migration matrix to be a probability:

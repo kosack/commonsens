@@ -12,8 +12,12 @@ from matplotlib.widgets import Slider, Button, RadioButtons
 
 
 if __name__ == '__main__':
-    
-    filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
+
+#    filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
+#    name = "Thomas"
+    filepat = "markus_mono_*.fits"
+    name = "Markus"    
+
     gammas,electrons,protons = inputs.load_all_from_fits(filepat)
 
 
@@ -50,7 +54,7 @@ if __name__ == '__main__':
         min_events = slider_minevents.val
         sca(ax)
         ax.clear()
-        out = calc_sensitivity_from_distributions( "thomas", 
+        out = calc_sensitivity_from_distributions( name, 
                                                    gammas, 
                                                    electrons,  
                                                    protons, 
@@ -58,8 +62,9 @@ if __name__ == '__main__':
                                                    min_sys_pct=min_sys_pct,
                                                    min_signif=min_signif,
                                                    min_events=min_events)
+        semilogy()
         plot_sensitivity_crabunits( gammas.log_e, out  ) 
-        ylim( 0.01, 1.1 )
+        ylim( 0.01, 10.0 )
         grid()
         draw()
 

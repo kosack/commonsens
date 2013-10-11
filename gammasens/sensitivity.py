@@ -67,11 +67,14 @@ def calc_background_rate(gammas, electrons, protons, return_all=False):
     :type protons: :class:`~gammasens.inputs.ParticleDistribution`
     """
 
-    # nominal rates in HZ over the theta2 regions used by each
-    # particle species note: does FOV have to be used for phi_diffuse
+    # nominal rates in Hz over the theta2 regions used by each
+    # particle species 
+
+    # TODO: does FOV have to be used for phi_diffuse
     # if it is much smaller?
     rp_nom = protons.rate_per_solidangle()*solid_angle(protons.phi_diffuse)
     re_nom = electrons.rate_per_solidangle()*solid_angle(electrons.phi_diffuse)
+
     # now want to normalize to the gamma-ray theta^2 cut (since the
     # protons and electrons were done at different cuts)
     rp = rp_nom * (gammas.thetasqr / (protons.thetasqr+EPSILON*units.deg))
@@ -280,7 +283,7 @@ def plot_rates( log_e, rate_p, rate_e, sens ):
                   drawstyle='steps-mid', linestyle='--'  )
 
 
-    plt.ylabel("Rate ({0})".format(rate_p.unit.to_string()) )
+    plt.ylabel("Rate {0}".format(rate_p.unit.to_string(format='latex')) )
     xlabel_energy()
     plt.legend( loc="best")
 
@@ -305,7 +308,7 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
 
     lines = plt.semilogy( log_e, sensitivity.value, marker=None,
                           label=label, drawstyle="default",**kwargs )
-    plt.ylabel("Sens ({0})".format( sensitivity.unit.to_string() ))
+    plt.ylabel("Sens {0}".format( sensitivity.unit.to_string(format='latex') ))
     xlabel_energy()
 
     plt.title("Differential Sensitivity")

@@ -15,6 +15,8 @@ def get_hist_1d(rootfile,name):
     - `name`:
     """
 
+    print "GET",name
+
     hist = rootfile.Get( name )
     xaxis = hist.GetXaxis()
     nbins = xaxis.GetNbins()
@@ -73,10 +75,10 @@ if __name__ == '__main__':
                     'N_simulated',
                     'r_simulated',
                     'ThetaSqr',
-                    'phi_diffuse',
-                    'R68_psf',
-                    'E_res',
-                    'E_bias' ]
+                    'phi_diffuse']
+#                    'R68_psf',
+#                    'E_res',
+#                    'E_bias' ]
 
     E = None
     cols = []
@@ -92,7 +94,10 @@ if __name__ == '__main__':
         cols.append( pyfits.Column( name=histname, format="D", array=val ))
 
     #insert the migration matrix:
-    etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "E_migration" )
+    try:
+        etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "E_migration" )
+    except:
+        etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "EMig" )
 
     cols.append( pyfits.Column( name="E_migration",
                                 format="{0}D".format(len(mat[0])),

@@ -7,6 +7,10 @@ if __name__ == '__main__':
 
     # load the example files
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
+    name = "Thomas"
+    filepat = "markus_mono_*.fits"
+    name = "Markus"
+
     gammas,electrons,protons = gs.inputs.load_all_from_fits(filepat)
     bgrate,rate_p,rate_e = gs.sensitivity.calc_background_rate( gammas, 
                                                                 electrons, 
@@ -17,14 +21,15 @@ if __name__ == '__main__':
 
 
     # make sensitivity plot for several parameters:
+    e2 = True
     plt.figure()
     for hours in [0.5,5,50]:
-        result = gs.sensitivity.calc_sensitivity( "thomas",
+        result = gs.sensitivity.calc_sensitivity( name,
                                                   bgrate,gamma_aeff,deltaE,
-                                                  obstime=hours*units.h)
-        gs.sensitivity.plot_sensitivity( gammas.log_e, result )
+                                                  obstime=hours*units.h,)
+        gs.sensitivity.plot_sensitivity( gammas.log_e, result,esquared=e2 )
 
-    gs.sensitivity.plot_crab( gammas.log_e ) # overlay Crab contours
+    gs.sensitivity.plot_crab( gammas.log_e, esquared=e2) # overlay Crab contours
     plt.legend(loc="best")
     plt.grid(alpha=0.3)    
 
@@ -33,7 +38,7 @@ if __name__ == '__main__':
     plt.figure()
     for hours in [0.5,2,5,50]:
         gs.sensitivity.plot_sensitivity_crabunits( gammas.log_e, \
-                            gs.sensitivity.calc_sensitivity("Thomas", 
+                            gs.sensitivity.calc_sensitivity(name, 
                                                             bgrate,gamma_aeff,
                                                             deltaE, 
                                                             obstime=hours*units.h))
