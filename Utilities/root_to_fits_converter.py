@@ -1,8 +1,10 @@
-import pyfits
+try:
+    from astropy.io import fits 
+except:
+    import pyfits as fits
 import ROOT
 from ROOT import TFile, TH1D,TH2F
 import sys
-import pyfits
 import os
 import numpy as np
 import fitshistogram
@@ -88,10 +90,10 @@ if __name__ == '__main__':
         lo,hi,cen, val = get_hist_1d( rootfile, histname )
 
         if len(cols) == 0:
-            cols.append(pyfits.Column( name="LOG10_E_LO", format="D",array=lo ))
-            cols.append(pyfits.Column( name="LOG10_E_HI", format="D",array=hi ))
+            cols.append(fits.Column( name="LOG10_E_LO", format="D",array=lo ))
+            cols.append(fits.Column( name="LOG10_E_HI", format="D",array=hi ))
 
-        cols.append( pyfits.Column( name=histname, format="D", array=val ))
+        cols.append( fits.Column( name=histname, format="D", array=val ))
 
     #insert the migration matrix:
     try:
@@ -99,11 +101,11 @@ if __name__ == '__main__':
     except:
         etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "EMig" )
 
-    cols.append( pyfits.Column( name="E_migration",
+    cols.append( fits.Column( name="E_migration",
                                 format="{0}D".format(len(mat[0])),
                                 array=mat))
 
-    tbhdu = pyfits.new_table( cols )
+    tbhdu = fits.new_table( cols )
     tbhdu.name="SENS"
 
 
@@ -118,5 +120,5 @@ if __name__ == '__main__':
 
     outputfilename = os.path.splitext(os.path.basename(rootfilename))[0]+".fits"
     print "WRITING:",outputfilename
-    hdus = pyfits.HDUList( hdus=[pyfits.PrimaryHDU(),tbhdu,mig.asFITS()] )
+    hdus = fits.HDUList( hdus=[fits.PrimaryHDU(),tbhdu,mig.asFITS()] )
     hdus.writeto(outputfilename, clobber=True)
