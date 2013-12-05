@@ -72,8 +72,28 @@ def shifted_energy_migration(log_e_true, value, migration_function):
     log_ereco = np.log10( migration_function( 10**log_e_true ) )
     return func(log_ereco)
 
+def matrix_energy_migration( log_e_true, value, log_e_reco, matrix):
+    """Migration-Matrix energy migration. Uses a matrix (e_true vs
+    e_reco) to migrate from true to reconstructed energy.
+    
+    :param log_e_true: array N of true energy bin centers
+    :param value: array of values for each true energy bin
+    :param log_e_reco: array of M reco energy bin centers
+    :param matrix: NxM array giving probability of Ereco vs Etrue
+    """
+    N,M = matrix.shape
+
+
+    recovalues = np.zeros_like(value)
+
+    for ii in range(N):
+        for jj in range(M):
+            recovalues[jj] += value[ii] * matrix[ii,jj]
+
+    return recovalues
 
 def _rebin1d(arr, ntimes=1):
+
     """ helper to rebin a 1D distribution (summing bins) """
     shp = arr.shape[0]//2**ntimes
     sh2 = shp, arr.shape[0]//shp
@@ -118,7 +138,7 @@ class ParticleDistribution(object):
 
         self._dnde_true_func = lambda e_true : 0.0*e_true
         self._migration_function = lambda e_true : e_true # default Etrue=Ereco
-        self._energy_migration_method = "shifted"
+        self._energy_migration_method = "matrix"
 
     def _resample(self, newlog_e, values ):
         """ resample values to new bin centers """
@@ -184,6 +204,9 @@ class ParticleDistribution(object):
         if self._energy_migration_method == "shifted":
             return shifted_energy_migration( self.log_e, value,
                                              self._migration_function) 
+        elif self._energy_migration_method == "matrix":
+            return matrix_energy_migration( self.log_e, value,
+                                            self.log_e, self.e_mig )
         else:
             raise ValueError("Energy Migration Method not implemented")
 
