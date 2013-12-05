@@ -1,4 +1,8 @@
-import pyfits
+try:
+    import pyfits
+except:
+    from astropy.io import fits as pyfits
+
 import numpy as np
 import math
 

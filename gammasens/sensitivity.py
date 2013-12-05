@@ -86,7 +86,7 @@ def calc_background_rate(gammas, electrons, protons, return_all=False):
     return (re+rp)
 
 
-def calc_sensitivity_from_distributions( name, gammas, electrons, protons,  
+def calc_from_distributions( name, gammas, electrons, protons,  
                                          **kwargs ):
     """Calculate sensitivity from input ParticleDistributions for gammas,
     electrons, and protons.

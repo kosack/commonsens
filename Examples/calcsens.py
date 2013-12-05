@@ -8,7 +8,8 @@ if __name__ == '__main__':
     # load the example files
     filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
     name = "Thomas"
-    filepat = "markus_mono_*.fits"
+#    filepat = "markus_mono_*.fits"
+    filepat = "markus_tight_*.fits"
     name = "Markus"
 
     gammas,electrons,protons = gs.inputs.load_all_from_fits(filepat)

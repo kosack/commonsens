@@ -24,11 +24,11 @@ if __name__ == '__main__':
     # make sensitivity plot for several parameters:
     plt.figure()
     for hours in [0.5,5,50]:
-        out = calc_sensitivity_from_distributions( "thomas",gammas,electrons,protons,
+        out = calc_from_distributions( "thomas",gammas,electrons,protons,
                                 obstime=hours*units.h)
         plot_sensitivity( gammas.log_e, out )
 
-        rout = calc_sensitivity_from_distributions( "thomas_r",rgammas,relectrons,rprotons,
+        rout = calc_from_distributions( "thomas_r",rgammas,relectrons,rprotons,
                                 obstime=hours*units.h)
         plot_sensitivity( rgammas.log_e, rout )
 
