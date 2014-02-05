@@ -10,15 +10,15 @@ using the fromFITS() constructor.  They may also be resampled to a new binning.
 >>> gammas.plot()  # show some debugging info
 
 you can load gammas,electrons, and protons at once, and set some
-default values if you have named your files appropriately. Use:
+default values if you have named your files appropriately (the words
+"gamma","electron", and "proton" are substituted for the *). Use:
 
->>> gammas,electrons,protons = load_all_from_fits( "MyAnalysis", "mysens-*.fits")
+>>> gammas,electrons,protons = load_all_from_fits( "mysens-*.fits")
+
 
 
 Code Documentation:
 ===================
-
-
 
 """
 
@@ -138,7 +138,8 @@ class ParticleDistribution(object):
 
         self._dnde_true_func = lambda e_true : 0.0*e_true
         self._migration_function = lambda e_true : e_true # default Etrue=Ereco
-        self._energy_migration_method = "matrix"
+#        self._energy_migration_method = "matrix"
+        self._energy_migration_method = "shifted"
 
     def _resample(self, newlog_e, values ):
         """ resample values to new bin centers """
@@ -414,4 +415,17 @@ def load_cta_response(filename):
     return (log_e_lo, log_e_hi, AA[:,1] *units.m**2,
             AA[:,5] * 1/units.s, 
             units.Quantity(AA[:,6],"erg/(cm**2 s)") )
+    
+
+def load_cta_response_fits(filename):
+    """ read pre-computed Aeff, BgRate, etc from a CTA FITS file """
+
+    table = fits.open(filename)['CTASENS']
+    return (table.data.field("LOG10_E_LO"),
+            table.data.field("LOG10_E_HI"),
+            table.data.field("EffectiveArea") * units.m**2,
+            table.data.field("BGRate") * 1.0/units.s,
+            units.Quantity(table.data.field("DiffSens"),"erg/(cm**2 s)"))
+            
+            
     
