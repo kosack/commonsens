@@ -12,6 +12,7 @@ setup(name='gammasens',
       long_description='',
       packages=['commonsens'],
       keywords='IACT gamma sensitivity',
+      license='GPLv3'
 #      license='',
       # classifiers=['Development Status :: 5 - Production/Stable',
       #              'Intended Audience :: Developers',
