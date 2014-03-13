@@ -41,17 +41,6 @@ if __name__ == '__main__':
     gammas    = cs.inputs.GammaDistribution.from_fits( options.gammas )
     electrons = cs.inputs.ElectronDistribution.from_fits( options.electrons )
     protons   = cs.inputs.ProtonDistribution.from_fits(options.protons )
-    protons.set_spectrum( cs.spectra.cosmicray_spectrum )
-    protons._migration_function = lambda e_true : e_true/3.0 
-    # load the example files
-    # filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
-    # name = "Thomas"
-    # #    filepat = "markus_mono_*.fits"
-    # filepat = "markus_tight_*.fits"
-    # name = "Markus"
-    # gammas,electrons,protons = cs.inputs.load_all_from_fits(filepat)
-    
-
 
     bgrate,rate_p,rate_e = cs.sensitivity.calc_background_rate( gammas, 
                                                                 electrons, 
