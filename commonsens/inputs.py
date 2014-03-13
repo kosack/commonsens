@@ -31,7 +31,7 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 from astropy.io import fits
 from astropy import units
 
-from commonsens import spectra
+from commonsens import spectra, config
 
 
 def extrap(x, xp, yp):
@@ -56,7 +56,7 @@ def normalize_to_prob(x):
     return x
 
 
-def shifted_energy_migration(log_e_true, value, migration_function):
+def functional_energy_migration(log_e_true, value, migration_function):
     """very simplistic energy migration (doesn't take into account any
     spread in the energy, just the bias. Returns an array of value as
     a func of log_e_reco (in the same energy bins as log_e_true)
@@ -146,6 +146,11 @@ class ParticleDistribution(object):
                             bounds_error=False, fill_value=0 )  
         return spline( newlog_e )
 
+    def set_energy_migration_method(self, method ):
+        if method not in ("matrix", "functional"):
+            raise ValueError("unknown energy migration method")
+        self._energy_migration_method = method
+        
 
     def resample(self, log_e_min, log_e_max, nbins):
         """
@@ -201,8 +206,10 @@ class ParticleDistribution(object):
         apply energy migration to go from true to reconstructed energy on
         the x-axis
         """
-        if self._energy_migration_method == "shifted":
-            return shifted_energy_migration( self.log_e, value,
+        print self._name," migration via ", self._energy_migration_method
+
+        if self._energy_migration_method == "functional":
+            return functional_energy_migration( self.log_e, value,
                                              self._migration_function) 
         elif self._energy_migration_method == "matrix":
             return matrix_energy_migration( self.log_e, value,
@@ -272,7 +279,7 @@ class ParticleDistribution(object):
     def rate_per_solidangle(self, ):
         """
         returns predicted detection rate of this particle species,
-        based on the measured flux spectrum
+        based on the given differential source spectrum (set by set_spectrum)
         """
 
         E = 10**self.log_e * units.TeV
@@ -358,12 +365,15 @@ class ParticleDistribution(object):
 class GammaDistribution(ParticleDistribution):
     def __init__(self, log_e_lo, log_e_hi):
         super(GammaDistribution,self).__init__(log_e_lo, log_e_hi, name="gammas")
-
+        self.set_energy_migration_method(config.gamma_energy_migration_method)
+        self.set_spectrum( spectra.hess_crab_spectrum )
+        
 class ElectronDistribution(ParticleDistribution):
     """ Electron ParticleDistribution """
     def __init__(self, log_e_lo, log_e_hi):
         super(ElectronDistribution,self).__init__(log_e_lo, log_e_hi,name="electrons")
         self.set_spectrum( spectra.electron_spectrum_fermi )
+        self.set_energy_migration_method(config.electron_energy_migration_method)
 
 class ProtonDistribution(ParticleDistribution):
     """ Proton ParticleDistribution """
@@ -371,6 +381,7 @@ class ProtonDistribution(ParticleDistribution):
         super(ProtonDistribution,self).__init__(log_e_lo, log_e_hi,name="protons")
         self.set_spectrum( spectra.cosmicray_spectrum )
         self._migration_function = lambda e_true : e_true/3.0 
+        self.set_energy_migration_method(config.proton_energy_migration_method)
 
 def load_all_from_fits(filepattern, species = ['gamma','electron','proton']):
     """Load set of particle species (gammas, electrons, hadrons) assuming
