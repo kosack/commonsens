@@ -48,7 +48,6 @@ if __name__ == '__main__':
                                                                 return_all=True)
 
 
-
     gamma_aeff = gammas.effective_area_reco()
     deltaE = gammas.delta_e
 

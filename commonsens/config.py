@@ -1,0 +1,3 @@
+proton_energy_migration_method="matrix"
+electrson_energy_migration_method="matrix"
+gamma_energy_migration_method="matrix"
