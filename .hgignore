@@ -1,0 +1,8 @@
+syntax: glob
+*~
+*.pyc
+*.fits.gz
+*.fits
+Doc
+dist
+.rope*
