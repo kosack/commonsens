@@ -4,7 +4,7 @@
 the sensitivity calculation.
 
 ParticleDistributions may be constructed from compatible FITS files
-using the fromFITS() constructor.  They may also be resampled to a new binning.
+using the from_fits() constructor.  They may also be resampled to a new binning.
 
 >>> gammas = ParticleDistribution.from_fits( "gammas", "mysens-gammas.fits" )
 >>> gammas.plot()  # show some debugging info
@@ -117,7 +117,7 @@ class ParticleDistribution(object):
      binning in E_reco
     """
 
-    def __init__(self, name, log_e_lo, log_e_hi):
+    def __init__(self, log_e_lo, log_e_hi, name=""):
         """
         - :name: name of particle distribution (e.g. "electrons")
         - :log_e_lo: array of lower energy bin values
@@ -324,7 +324,7 @@ class ParticleDistribution(object):
         plt.colorbar()
 
     @classmethod
-    def from_fits(cls, name, filename):
+    def from_fits(cls, filename):
         """
         Construct a ParticleDistribution from a FITS file that has a SENS
         extension
@@ -333,13 +333,13 @@ class ParticleDistribution(object):
         :param filename: FITS file with a SENS extension
         """
 
-        print "LOADING: {0} ({1})".format(filename,name)
+        print "LOADING: {0}".format(filename)
 
         sens = fits.open(filename)['SENS']
         log_e_lo = sens.data.field("LOG10_E_LO") 
         log_e_hi = sens.data.field("LOG10_E_HI")
 
-        part = ParticleDistribution( name , log_e_lo, log_e_hi )
+        part = cls( log_e_lo, log_e_hi )
         part.n_detected = sens.data.field("N_detected")
         part.n_simulated = sens.data.field("N_simulated")
         part.r_simulated = sens.data.field("r_simulated") * units.meter
@@ -355,10 +355,22 @@ class ParticleDistribution(object):
         return part
 
 
+class GammaDistribution(ParticleDistribution):
+    def __init__(self, log_e_lo, log_e_hi):
+        super(GammaDistribution,self).__init__(log_e_lo, log_e_hi, name="gammas")
 
+class ElectronDistribution(ParticleDistribution):
+    """ Electron ParticleDistribution """
+    def __init__(self, log_e_lo, log_e_hi):
+        super(ElectronDistribution,self).__init__(log_e_lo, log_e_hi,name="electrons")
+        self.set_spectrum( spectra.electron_spectrum_fermi )
 
-
-
+class ProtonDistribution(ParticleDistribution):
+    """ Proton ParticleDistribution """
+    def __init__(self, log_e_lo, log_e_hi):
+        super(ProtonDistribution,self).__init__(log_e_lo, log_e_hi,name="protons")
+        self.set_spectrum( spectra.cosmicray_spectrum )
+        self._migration_function = lambda e_true : e_true/3.0 
 
 def load_all_from_fits(filepattern, species = ['gamma','electron','proton']):
     """Load set of particle species (gammas, electrons, hadrons) assuming
@@ -372,18 +384,17 @@ def load_all_from_fits(filepattern, species = ['gamma','electron','proton']):
     dists = []
 
     for particle in species:
-        dist = ParticleDistribution.from_fits(particle,
-                                             filepattern.replace("*", particle))
+        if particle == 'gamma':
+            dist = GammaDistribution.from_fits(filepattern.replace("*", particle))
+        elif particle == 'electron':
+            dist = ElectronDistribution.from_fits(filepattern.replace("*", particle))          
+        elif particle == 'proton':
+            dist = ProtonDistribution.from_fits(filepattern.replace("*", particle))     
+        else: # unknown particle
+            dist = ParticleDistribution.from_fits(filepattern.replace("*",particle), name=particle)         
+
+
         dists.append(dist)
-
-
-    # set some defaults:
-    dists[1].set_spectrum( spectra.electron_spectrum )
-    dists[2].set_spectrum( spectra.cosmicray_spectrum )
-
-    # simplistic proton migration function used in CTA curves (just
-    # based on branching ratio)
-    dists[2]._migration_function = lambda e_true : e_true*3.0 
 
     return dists
     
