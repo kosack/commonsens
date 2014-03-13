@@ -30,7 +30,7 @@ class SensOutput(dict):
 
 def xlabel_energy():
     """ add the x-label for Energy in nice format """
-    plt.xlabel(r"$\log_{10}(E_{reco}/\mathrm{TeV})$")
+    plt.xlabel(r"$E_{reco}/\mathrm{TeV}$")
 
 
 def solid_angle( theta ):
@@ -260,9 +260,9 @@ def plot_significances( log_e, sens ):
     """ sens: output dictionary from calc_sensitivity """ 
 
     plt.scatter( log_e, stats.signif_lima( sens['N_on'], sens['N_off'], 
-                                           sens['alpha'] ) )
+                                           sens['alpha'] ),label=r"adjusted" )
     plt.scatter( log_e, stats.signif_lima( sens['N_on_orig'], sens['N_off'], 
-                                           sens['alpha'] ),
+                                           sens['alpha'],label=r"original" ),
                  color='grey' )
     plt.ylabel("Significance")
     xlabel_energy()
@@ -306,7 +306,7 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
 
-    lines = plt.semilogy( log_e, sensitivity.value, marker=None,
+    lines = plt.loglog( E.value, sensitivity.value, marker=None,
                           label=label, drawstyle="default",**kwargs )
     plt.ylabel("Sens {0}".format( sensitivity.unit.to_string(format='latex') ))
     xlabel_energy()
@@ -321,24 +321,24 @@ def plot_crab( log_e, esquared=False ):
 
 
     crab = spectra.hess_crab_spectrum( 10**(log_e) )
+    E = 10**log_e * units.TeV
 
     if (esquared):
-        E = 10**log_e * units.TeV
         crab = (crab*E**2).to(units.erg/units.cm**2/units.s) 
 
 
 
-    plt.semilogy( log_e, 
+    plt.semilogy( E.value, 
                   crab.value * 1.0, 
                   linestyle="--", color='black',
                   label="100% Crab")
     
-    plt.semilogy( log_e, 
+    plt.semilogy( E.value, 
                   crab.value * 0.1, 
                   linestyle="--", color='gray',
                   label="10% Crab" )
     
-    plt.semilogy( log_e, 
+    plt.semilogy( E.value, 
                   crab.value * 0.01, 
                   linestyle=":", color='gray',
                   label=" 1% Crab" )
@@ -363,7 +363,7 @@ def plot_sensitivity_crabunits( log_e, sens ):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
     crabs = spectra.hess_crab_spectrum( 10**log_e )
-    plt.plot( log_e, (sensitivity/crabs).to("").value, label=label )
+    plt.plot( 10**log_e, (sensitivity/crabs).to("").value, label=label )
     xlabel_energy()
     plt.ylabel("Diff Sensitivity (Crab Units)")
 
