@@ -1,7 +1,7 @@
 :mod:`spectra` Module
 ---------------------
 
-.. automodule:: gammasens.spectra
+.. automodule:: commonsens.spectra
     :members:
     :undoc-members:
     :show-inheritance:

@@ -3,8 +3,8 @@ A simple example of making an interactive sensitivity plot, with
 sliders to adjust the parameters
 """
 
-from gammasens import *
-from gammasens.sensitivity import calc_from_distributions,plot_sensitivity_crabunits
+from commonsens import *
+from commonsens.sensitivity import calc_from_distributions,plot_sensitivity_crabunits
 
 from astropy import units
 from pylab import *

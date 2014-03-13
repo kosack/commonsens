@@ -1,4 +1,4 @@
-"""This module contains a class (:class:`~gammasens.particledist.ParticleDistribution`)  used to store and calculate information about a simulated particle distribution for a single particle species, as well as some utility functions for loading ParticleDistributions
+"""This module contains a class (:class:`~commonsens.particledist.ParticleDistribution`)  used to store and calculate information about a simulated particle distribution for a single particle species, as well as some utility functions for loading ParticleDistributions
 
 `ParticleDistributions` of gammas, electrons, and protons are used in
 the sensitivity calculation.
@@ -31,7 +31,7 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 from astropy.io import fits
 from astropy import units
 
-from gammasens import spectra
+from commonsens import spectra
 
 
 def extrap(x, xp, yp):

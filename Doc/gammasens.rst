@@ -1,10 +1,10 @@
-gammasens Package
+commonsens Package
 =================
 
-:mod:`gammasens` Package
+:mod:`commonsens` Package
 ------------------------
 
-.. automodule:: gammasens
+.. automodule:: commonsens
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,4 +1,4 @@
-import gammasens as gs
+import commonsens as gs
 from matplotlib import pyplot as plt
 from astropy import units
 

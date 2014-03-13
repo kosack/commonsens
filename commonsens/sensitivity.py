@@ -10,9 +10,9 @@ from math import pi
 from astropy import units
 from scipy import optimize
 
-from gammasens import inputs
-from gammasens import spectra
-from gammasens import stats
+from commonsens import inputs
+from commonsens import spectra
+from commonsens import stats
 
 
 EPSILON = 1.0e-10
@@ -60,11 +60,11 @@ def calc_background_rate(gammas, electrons, protons, return_all=False):
     Calculate the background rate, given the input particle distributions
 
     :param gammas: gamma ray input data
-    :type gammas: :class:`~gammasens.inputs.ParticleDistribution`
+    :type gammas: :class:`~commonsens.inputs.ParticleDistribution`
     :param electrons: electron input data
-    :type electrons: :class:`~gammasens.inputs.ParticleDistribution`
+    :type electrons: :class:`~commonsens.inputs.ParticleDistribution`
     :param protons: proton input data
-    :type protons: :class:`~gammasens.inputs.ParticleDistribution`
+    :type protons: :class:`~commonsens.inputs.ParticleDistribution`
     """
 
     # nominal rates in Hz over the theta2 regions used by each
@@ -94,8 +94,8 @@ def calc_from_distributions( name, gammas, electrons, protons,
     Arguments:
     :param `name`:
     :param gammas,electrons,protons: particle input data
-    :type gammas,electrons,protons: :class:`~gammasens.inputs.ParticleDistribution`
-    :param kwargs:: see gammasens.sensitivity.calc_sensitivity()
+    :type gammas,electrons,protons: :class:`~commonsens.inputs.ParticleDistribution`
+    :param kwargs:: see commonsens.sensitivity.calc_sensitivity()
 
     """
     

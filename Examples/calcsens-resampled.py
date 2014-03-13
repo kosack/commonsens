@@ -1,5 +1,5 @@
-from gammasens import inputs
-from gammasens.sensitivity import *
+from commonsens import inputs
+from commonsens.sensitivity import *
 from matplotlib import pyplot as plt
 from astropy import units
 

@@ -1,7 +1,7 @@
 :mod:`stats` Module
 -------------------------
 
-.. automodule:: gammasens.stats
+.. automodule:: commonsens.stats
     :members:
     :undoc-members:
     :show-inheritance:
