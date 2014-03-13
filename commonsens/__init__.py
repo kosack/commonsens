@@ -1,5 +1,5 @@
 __all__ = [ 'inputs','sensitivity','spectra', 'stats' ]
-__version__ = 1.1
+__version__ = 1.2
 
 import inputs
 import sensitivity
