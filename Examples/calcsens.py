@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+
+#
+# complete example of calcualting and plotting sensitivity. 
+# 
+# EXAMPLE OF HOW TO RUN:
+#  calcsens.py -l "Dan Zeta Loose" -g dan-zeta-loose-gamma.fits -e dan-zeta-loose-electron.fits -p dan-zeta-loose-proton.fits
+#
+# OR VIA IPYTHON:
+# ipython calcsens.py -- -l "Dan Zeta Loose" -g dan-zeta-loose-gamma.fits -e dan-zeta-loose-electron.fits -p dan-zeta-loose-proton.fits
+
 import commonsens as cs
 from matplotlib import pyplot as plt
 from astropy import units
@@ -18,12 +28,12 @@ if __name__ == '__main__':
     parser.add_option("-l","--label", dest="label", 
                       help="name of analysis", default="")
 
-
+    parser.set_usage("calcsens.py [options] -g <gammafile> -e <electronfile> -p <protonfile> ")
 
     (options, args) = parser.parse_args()
 
     if not (options.gammas and options.electrons and options.protons):
-        print "Usage: calcsens.py -g <gammafile> -e <electronfile> -p <protonfile>"
+        parser.error("wrong arguments. See --help for more info")
         sys.exit(1)
         
     name = options.label
