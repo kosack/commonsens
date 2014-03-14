@@ -175,7 +175,8 @@ class ParticleDistribution(object):
         log_e_hi = therange[1:]
         newlog_e = (log_e_hi+log_e_lo)/2.0
 
-        dist = ParticleDistribution( self._name+"_resamp", log_e_lo,log_e_hi)
+        dist = ParticleDistribution( log_e_lo,log_e_hi, 
+                                     name=self._name+"_resamp")
         newlog_e = dist.log_e
 
         # kind of a hack:
@@ -185,6 +186,8 @@ class ParticleDistribution(object):
         for key in self.__dict__.keys():
             if  (not key.startswith("_")) and  (not key.endswith("_mig")):
                 val = self.__dict__[key]
+                if (val == None):
+                    continue
                 if type(val) == units.Quantity:
                     dist.__dict__[key] = self._resample( newlog_e, 
                                                          val.value )*val.unit
