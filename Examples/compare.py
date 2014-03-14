@@ -28,7 +28,7 @@ if __name__ == '__main__':
                                                     gammas,
                                                     electrons,
                                                     protons,
-                                                    obstime=50*units.h)
+                                                    obstime=1*units.h)
         
         sensitivity.plot_sensitivity( gammas.log_e, result, esquared=e2 )
 

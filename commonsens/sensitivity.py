@@ -44,6 +44,10 @@ def solid_angle( theta ):
     # return (1.0-np.cos(theta.to(units.rad)))*2.0*np.pi*units.steradian
 
 
+def smooth( values, windowsize=4 ):
+    window = np.ones(windowsize,'d')
+    padval = np.concatenate( [ [values[0]]*windowsize,values,[values[-1]]*windowsize] )
+    return np.convolve(  window/len(window), padval, mode='same')[windowsize-1:-windowsize-1]
 
 
 def residual_signif(N_on, N_off, alpha, minsig):
@@ -102,6 +106,8 @@ def calc_from_distributions( name, gammas, electrons, protons,
     background_rate = calc_background_rate( gammas, electrons,protons)
     gamma_aeff_reco = gammas.effective_area_reco()
     delta_e = gammas.delta_e
+
+    #    background_rate = smooth(background_rate.value)*background_rate.unit
 
     return calc_sensitivity( name, background_rate, gamma_aeff_reco, 
                              delta_e, **kwargs)

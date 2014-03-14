@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     resample = True
 
-    filepat = "thomas_mono_*_zen020_az180_off0.50.fits"
+    filepat = "PerfData/APR.fits"
     gammas,electrons,protons = inputs.load_all_from_fits(filepat)
 
 

@@ -24,6 +24,8 @@ if __name__ == '__main__':
     #                   help="name of analysis")
     parser.add_option("-b","--batch", dest="batch", 
                       help="batch mode, don't display")
+    parser.add_option("-w","--write", dest="write", 
+                      help="write out the plots")
 
 
     parser.set_usage("calcsens.py [options] <performance file> ")
@@ -56,7 +58,8 @@ if __name__ == '__main__':
         sens.plot_crab( gammas.log_e, esquared=e2) # overlay Crab contours
         plt.legend(loc="best")
         plt.grid(alpha=0.3)    
-        plt.savefig( name+"_sensitivity.pdf")
+        if (options.write):
+            plt.savefig( name+"_sensitivity.pdf")
 
         # do the same in crab units:
         plt.figure()
@@ -67,7 +70,8 @@ if __name__ == '__main__':
 
         plt.legend(loc='best', fontsize='small')
         plt.grid(alpha=0.3)    
-        plt.savefig( name+"_sensitivity_crab.pdf")
+        if (options.write):
+            plt.savefig( name+"_sensitivity_crab.pdf")
 
         # plot some of the intermediate distributions for debugging:
         if True:
@@ -81,16 +85,22 @@ if __name__ == '__main__':
             plt.subplot(2,2,4)
             sens.plot_rates( gammas.log_e, rate_p, rate_e, result )
             plt.gcf().suptitle("Intermediate Distributions")
-            plt.savefig( name+"_intermediate.pdf")
+            if (options.write):
+                plt.savefig( name+"_intermediate.pdf")
 
         # plot the underlying distributions
         if True:
             gammas.plot()
-            plt.savefig( name+"_gammas.pdf")
+            if (options.write):
+                plt.savefig( name+"_gammas.pdf")
+
             electrons.plot()
-            plt.savefig( name+"_electrons.pdf")
+            if (options.write):
+                plt.savefig( name+"_electrons.pdf")
+
             protons.plot()
-            plt.savefig( name+"_protons.pdf")
+            if (options.write):
+                plt.savefig( name+"_protons.pdf")
 
         if not options.batch:
             plt.show()
