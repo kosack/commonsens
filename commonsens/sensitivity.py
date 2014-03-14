@@ -30,7 +30,7 @@ class SensOutput(dict):
 
 def xlabel_energy():
     """ add the x-label for Energy in nice format """
-    plt.xlabel(r"$E_{reco}/\mathrm{TeV}$")
+    plt.xlabel(r"$E_{reco} (\mathrm{TeV})$")
 
 
 def solid_angle( theta ):
@@ -237,9 +237,9 @@ def plot_effareas( gammas, electrons, protons ):
     aeff_p = electrons.effective_area_reco().to(units.m**2).value
     aeff_g = gammas.effective_area_reco().to(units.m**2).value
 
-    plt.semilogy( protons.log_e, aeff_p, label="p", **PSTY)
-    plt.semilogy( electrons.log_e, aeff_e, label="e-", **PSTY )
-    plt.semilogy( gammas.log_e, aeff_g, label=r"$\gamma$", **PSTY)
+    plt.loglog( 10**protons.log_e, aeff_p, label="p", **PSTY)
+    plt.loglog( 10**electrons.log_e, aeff_e, label="e-", **PSTY )
+    plt.loglog( 10**gammas.log_e, aeff_g, label=r"$\gamma$", **PSTY)
     plt.ylabel("Effective Area (m$^2$)")
     xlabel_energy()
     plt.legend(loc="best")
@@ -247,9 +247,10 @@ def plot_effareas( gammas, electrons, protons ):
 
 def plot_count_distributions( log_e, sens ):
 
-    plt.semilogy( log_e, sens['N_on'], label="N_on", **PSTY  )
-    plt.semilogy( log_e, sens['N_off'], color='r', label="N_off", **PSTY )
-    plt.semilogy( log_e, stats.excess(sens['N_on'],sens['N_off'],sens['alpha']), 
+    plt.loglog( 10**log_e, sens['N_on'], label="N_on", **PSTY  )
+    plt.loglog( 10**log_e, sens['N_off'], color='r', label="N_off", **PSTY )
+    plt.loglog( 10**log_e, stats.excess(sens['N_on'],sens['N_off'],
+                                        sens['alpha']), 
                   color='black', label="N_exc", **PSTY )
     plt.ylabel("Counts ({0})".format(sens['params']['obstime']))
     xlabel_energy()
@@ -259,10 +260,11 @@ def plot_count_distributions( log_e, sens ):
 def plot_significances( log_e, sens ):
     """ sens: output dictionary from calc_sensitivity """ 
 
-    plt.scatter( log_e, stats.signif_lima( sens['N_on'], sens['N_off'], 
+    plt.semilogx()
+    plt.scatter( 10**log_e, stats.signif_lima( sens['N_on'], sens['N_off'], 
                                            sens['alpha'] ),label=r"adjusted" )
-    plt.scatter( log_e, stats.signif_lima( sens['N_on_orig'], sens['N_off'], 
-                                           sens['alpha'],label=r"original" ),
+    plt.scatter( 10**log_e, stats.signif_lima( sens['N_on_orig'], sens['N_off'], 
+                                           sens['alpha']),label=r"original" ,
                  color='grey' )
     plt.ylabel("Significance")
     xlabel_energy()
@@ -270,15 +272,15 @@ def plot_significances( log_e, sens ):
 
 
 def plot_rates( log_e, rate_p, rate_e, sens ):
-    plt.semilogy( log_e, rate_p.to("s^-1").value,label="p ", **PSTY)
-    plt.semilogy( log_e, rate_e.to("s^-1").value ,label="e- ",**PSTY)
+    plt.loglog( 10**log_e, rate_p.to("s^-1").value,label="p ", **PSTY)
+    plt.loglog( 10**log_e, rate_e.to("s^-1").value ,label="e- ",**PSTY)
 
     # also overlay the predicted minimum gamma excess rate
     excess_rate = stats.excess(sens['N_on'],sens['N_off'],
                                sens['alpha']) \
                   / sens['params']['obstime']
 
-    plt.semilogy( log_e, excess_rate.to(1/units.s).value,
+    plt.loglog( 10**log_e, excess_rate.to(1/units.s).value,
                   label=r"$\gamma_\mathrm{exc}$",color='g', 
                   drawstyle='steps-mid', linestyle='--'  )
 
@@ -363,6 +365,7 @@ def plot_sensitivity_crabunits( log_e, sens ):
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                              par['min_signif'], sens['name'])
     crabs = spectra.hess_crab_spectrum( 10**log_e )
+    plt.loglog()
     plt.plot( 10**log_e, (sensitivity/crabs).to("").value, label=label )
     xlabel_energy()
     plt.ylabel("Diff Sensitivity (Crab Units)")
