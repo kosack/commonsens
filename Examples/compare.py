@@ -12,10 +12,11 @@ if __name__ == '__main__':
     
 
     datasets = {
-#        "Thomas":"thomas_mono_*_zen020_az180_off0.50.fits",
-        "Markus Old":"markus_mono_*.fits",
-        "Markus Tight": "markus_tight_*.fits",
-        "Dan Zeta Loose": "dan-zeta-loose-*.fits"
+        "ParisMVA Hybrid":"PerfData/ParisMVA_Hybrid.fits",
+        "APR": "PerfData/APR.fits",
+        "Loose Zeta": "PerfData/dan_zeta_loose.fits",
+        "Tight": "PerfData/tight.fits",
+        "Thomas Mono": "PerfData/thomas_mono.fits"       
     }
 
     e2=True
@@ -35,5 +36,6 @@ if __name__ == '__main__':
     sensitivity.plot_crab( gammas.log_e, esquared=e2) # overlay Crab contours
     plt.legend(loc="best")
     plt.grid(alpha=0.3)    
+    plt.xlim( 0.02, 100 )
 
     plt.show()

@@ -10,91 +10,87 @@
 # ipython calcsens.py -- -l "Dan Zeta Loose" -g dan-zeta-loose-gamma.fits -e dan-zeta-loose-electron.fits -p dan-zeta-loose-proton.fits
 
 import commonsens as cs
+from commonsens import sensitivity as sens
 from matplotlib import pyplot as plt
 from astropy import units
 from optparse import OptionParser
 import sys
-
+import os
 
 if __name__ == '__main__':
     
     parser = OptionParser()
-    parser.add_option("-g","--gammas", dest="gammas", 
-                      help="gamma-ray input file")
-    parser.add_option("-e","--electrons", dest="electrons", 
-                      help="electron input file")
-    parser.add_option("-p","--protons", dest="protons", 
-                      help="proton input file")
-    parser.add_option("-l","--label", dest="label", 
-                      help="name of analysis", default="")
+    # parser.add_option("-l","--label", dest="label", 
+    #                   help="name of analysis")
+    parser.add_option("-b","--batch", dest="batch", 
+                      help="batch mode, don't display")
 
-    parser.set_usage("calcsens.py [options] -g <gammafile> -e <electronfile> -p <protonfile> ")
 
+    parser.set_usage("calcsens.py [options] <performance file> ")
     (options, args) = parser.parse_args()
 
-    if not (options.gammas and options.electrons and options.protons):
-        parser.error("wrong arguments. See --help for more info")
-        sys.exit(1)
+
+    for filename in args:
         
-    name = options.label
+        name, _ = os.path.splitext( os.path.basename( filename ) )
+        gammas,electrons,protons = cs.inputs.load_all_from_fits( filename )
 
-    gammas    = cs.inputs.GammaDistribution.from_fits( options.gammas )
-    electrons = cs.inputs.ElectronDistribution.from_fits( options.electrons )
-    protons   = cs.inputs.ProtonDistribution.from_fits(options.protons )
+        bgrate,rate_p,rate_e = sens.calc_background_rate( gammas,
+                                                          electrons,
+                                                          protons,
+                                                          return_all=True)
 
-    bgrate,rate_p,rate_e = cs.sensitivity.calc_background_rate( gammas, 
-                                                                electrons, 
-                                                                protons, 
-                                                                return_all=True)
-
-
-    gamma_aeff = gammas.effective_area_reco()
-    deltaE = gammas.delta_e
+        gamma_aeff = gammas.effective_area_reco()
+        deltaE = gammas.delta_e
 
 
-    # make sensitivity plot for several parameters:
-    e2 = True
-    plt.figure()
-    for hours in [0.5,5,50]:
-        result = cs.sensitivity.calc_sensitivity( name,
-                                                  bgrate,gamma_aeff,deltaE,
-                                                  obstime=hours*units.h,)
-        cs.sensitivity.plot_sensitivity( gammas.log_e, result,esquared=e2 )
+        # make sensitivity plot for several parameters:
+        e2 = True
+        plt.figure()
+        for hours in [0.5,5,50]:
+            result = sens.calc_sensitivity( name,
+                                            bgrate,gamma_aeff,deltaE,
+                                            obstime=hours*units.h,)
+            sens.plot_sensitivity( gammas.log_e, result,esquared=e2 )
 
-    cs.sensitivity.plot_crab( gammas.log_e, esquared=e2) # overlay Crab contours
-    plt.legend(loc="best")
-    plt.grid(alpha=0.3)    
+        sens.plot_crab( gammas.log_e, esquared=e2) # overlay Crab contours
+        plt.legend(loc="best")
+        plt.grid(alpha=0.3)    
+        plt.savefig( name+"_sensitivity.pdf")
 
+        # do the same in crab units:
+        plt.figure()
+        for hours in [0.5,2,5,50]:
+            result = sens.calc_sensitivity( name, bgrate,gamma_aeff,
+                                            deltaE, obstime=hours*units.h)
+            sens.plot_sensitivity_crabunits( gammas.log_e, result )
 
-    # do the same in crab units:
-    plt.figure()
-    for hours in [0.5,2,5,50]:
-        cs.sensitivity.plot_sensitivity_crabunits( gammas.log_e, \
-                            cs.sensitivity.calc_sensitivity(name, 
-                                                            bgrate,gamma_aeff,
-                                                            deltaE, 
-                                                            obstime=hours*units.h))
-    plt.legend(loc='best', fontsize='small')
-    plt.grid(alpha=0.3)    
+        plt.legend(loc='best', fontsize='small')
+        plt.grid(alpha=0.3)    
+        plt.savefig( name+"_sensitivity_crab.pdf")
 
+        # plot some of the intermediate distributions for debugging:
+        if True:
+            plt.figure(figsize=(10,9))
+            plt.subplot(2,2,1)
+            sens.plot_effareas( gammas, electrons, protons )
+            plt.subplot(2,2,2)
+            sens.plot_count_distributions( gammas.log_e, result )
+            plt.subplot(2,2,3)
+            sens.plot_significances( gammas.log_e, result )
+            plt.subplot(2,2,4)
+            sens.plot_rates( gammas.log_e, rate_p, rate_e, result )
+            plt.gcf().suptitle("Intermediate Distributions")
+            plt.savefig( name+"_intermediate.pdf")
 
-    # plot some of the intermediate distributions for debugging:
-    if True:
-        plt.figure(figsize=(10,9))
-        plt.subplot(2,2,1)
-        cs.sensitivity.plot_effareas( gammas, electrons, protons )
-        plt.subplot(2,2,2)
-        cs.sensitivity.plot_count_distributions( gammas.log_e, result )
-        plt.subplot(2,2,3)
-        cs.sensitivity.plot_significances( gammas.log_e, result )
-        plt.subplot(2,2,4)
-        cs.sensitivity.plot_rates( gammas.log_e, rate_p, rate_e, result )
-        plt.gcf().suptitle("Intermediate Distributions")
+        # plot the underlying distributions
+        if True:
+            gammas.plot()
+            plt.savefig( name+"_gammas.pdf")
+            electrons.plot()
+            plt.savefig( name+"_electrons.pdf")
+            protons.plot()
+            plt.savefig( name+"_protons.pdf")
 
-    # plot the underlying distributions
-    if True:
-        gammas.plot()
-        electrons.plot()
-        protons.plot()
-
-    plt.show()
+        if not options.batch:
+            plt.show()
