@@ -1,7 +1,7 @@
 :mod:`sensitivity` Module
 -------------------------
 
-.. automodule:: gammasens.sensitivity
+.. automodule:: commonsens.sensitivity
     :members:
     :undoc-members:
     :show-inheritance:

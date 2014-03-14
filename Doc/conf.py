@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# GammaSens documentation build configuration file, created by
+# CommonSens documentation build configuration file, created by
 # sphinx-quickstart on Thu Jul  4 11:57:21 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -12,7 +12,7 @@
 # serve to show the default.
 
 import sys, os
-import gammasens
+import commonsens
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,14 +41,14 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'gammasens'
+project = u'commonsens'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = str(gammasens.__version__)
+version = str(commonsens.__version__)
 # The full version, including alpha/beta/rc tags.
 release = version+'r0'
 
@@ -165,7 +165,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'GammaSensdoc'
+htmlhelp_basename = 'CommonSensdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -184,7 +184,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'GammaSens.tex', u'GammaSens Documentation',
+  ('index', 'CommonSens.tex', u'CommonSens Documentation',
    u'K. Kosack, Y. Becherini', 'manual'),
 ]
 
@@ -214,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sensitivity', u'GammaSens Documentation',
+    ('index', 'sensitivity', u'CommonSens Documentation',
      [u'K. Kosack',u'Y. Becherini'], 1)
 ]
 
@@ -228,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'GammaSens', u'GammaSens Documentation',
-   u'K. Kosack', 'GammaSens', 'One line description of project.',
+  ('index', 'CommonSens', u'CommonSens Documentation',
+   u'K. Kosack', 'CommonSens', 'One line description of project.',
    'Miscellaneous'),
 ]
 

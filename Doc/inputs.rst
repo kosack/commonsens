@@ -1,7 +1,7 @@
 :mod:`inputs` Module
 --------------------------
 
-.. automodule:: gammasens.inputs
+.. automodule:: commonsens.inputs
     :members:
     :undoc-members:
     :show-inheritance:
