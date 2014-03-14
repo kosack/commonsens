@@ -301,13 +301,13 @@ class ParticleDistribution(object):
 
         plt.subplot(1,2,1)
         plt.title( self._name )
-        plt.semilogy( self.log_e, self.n_simulated,color='gray',
+        plt.loglog( 10**self.log_e, self.n_simulated,color='gray',
                       linewidth=3.0,
                       label="N_sim(E_true)", drawstyle='steps-mid' )
-        plt.semilogy( self.log_e, self.n_simulated_reco, color='r',
+        plt.loglog( 10**self.log_e, self.n_simulated_reco, color='r',
                       linewidth=3.0,
                       label="N_sim(E_reco)", drawstyle='steps-mid' )
-        plt.semilogy( self.log_e, self.n_detected,color='r', 
+        plt.loglog( 10**self.log_e, self.n_detected,color='r', 
                       linewidth=3.0,
                       linestyle="--", label="N_det(E_reco)",
                       drawstyle='steps-mid')
@@ -332,7 +332,7 @@ class ParticleDistribution(object):
         plt.colorbar()
 
     @classmethod
-    def from_fits(cls, filename):
+    def from_fits(cls, filename, hduname):
         """
         Construct a ParticleDistribution from a FITS file that has a SENS
         extension
@@ -343,7 +343,7 @@ class ParticleDistribution(object):
 
         print "LOADING: {0}".format(filename)
 
-        sens = fits.open(filename)['SENS']
+        sens = fits.open(filename)[hduname]
         log_e_lo = sens.data.field("LOG10_E_LO") 
         log_e_hi = sens.data.field("LOG10_E_HI")
 
@@ -381,34 +381,20 @@ class ProtonDistribution(ParticleDistribution):
     def __init__(self, log_e_lo, log_e_hi):
         super(ProtonDistribution,self).__init__(log_e_lo, log_e_hi,name="protons")
         self.set_spectrum( spectra.cosmicray_spectrum )
-        self._migration_function = lambda e_true : e_true/3.0 
+        self._migration_function = lambda e_true : e_true*3.0 
         self.set_energy_migration_method(config.proton_energy_migration_method)
 
-def load_all_from_fits(filepattern, species = ['gamma','electron','proton']):
-    """Load set of particle species (gammas, electrons, hadrons) assuming
-    the files are named identically, but with the character "*"
-    replaced with "gamma", "electron" or "proton" in the filename.
-
-    :param name: identifier of this data set
-    :param filepattern: filename, with the particle type replaced with *
+def load_all_from_fits(fitsfile):
+    """Load set of particle species (gammas, electrons, hadrons) from a
+    FITS files containing GAMMA, ELECTRON, and PROTON HDUs
+    
+    :returns: (gammas,electrons,protons) 
     """
 
-    dists = []
-
-    for particle in species:
-        if particle == 'gamma':
-            dist = GammaDistribution.from_fits(filepattern.replace("*", particle))
-        elif particle == 'electron':
-            dist = ElectronDistribution.from_fits(filepattern.replace("*", particle))          
-        elif particle == 'proton':
-            dist = ProtonDistribution.from_fits(filepattern.replace("*", particle))     
-        else: # unknown particle
-            dist = ParticleDistribution.from_fits(filepattern.replace("*",particle), name=particle)         
-
-
-        dists.append(dist)
-
-    return dists
+    gammas = GammaDistribution.from_fits(fitsfile,"GAMMA")
+    electrons = ElectronDistribution.from_fits( fitsfile, "ELECTRON")
+    protons = ProtonDistribution.from_fits( fitsfile, "PROTON")
+    return (gammas,electrons,protons)
     
 
 
