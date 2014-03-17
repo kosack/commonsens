@@ -6,14 +6,14 @@ the sensitivity calculation.
 ParticleDistributions may be constructed from compatible FITS files
 using the from_fits() constructor.  They may also be resampled to a new binning.
 
->>> gammas = ParticleDistribution.from_fits( "gammas", "mysens-gammas.fits" )
+>>> gammas = GammaDistribution.from_fits( "mysens.fits" )
 >>> gammas.plot()  # show some debugging info
 
 you can load gammas,electrons, and protons at once, and set some
 default values if you have named your files appropriately (the words
 "gamma","electron", and "proton" are substituted for the *). Use:
 
->>> gammas,electrons,protons = load_all_from_fits( "mysens-*.fits")
+>>> gammas,electrons,protons = load_all_from_fits( "mysens.fits")
 
 
 
@@ -84,7 +84,6 @@ def matrix_energy_migration( log_e_true, value, log_e_reco, matrix):
     """
     N,M = matrix.shape
 
-
     recovalues = np.zeros_like(value)
 
     for ii in range(N):
@@ -135,6 +134,7 @@ class ParticleDistribution(object):
         self.r_simulated = None #: radius of simulation per E_true bin
         self.phi_diffuse = None #: diffuse simulation cone angle 
         self.e_mig = None #: 2D energy migration matrix (E_true vs E_reco)
+        self.e_mig_normalized = None #: normalized 2D energy migration matrix
         self.r68_psf = None #: 68% containment radius of PSF
 
         self._dnde_true_func = lambda e_true : 0.0*e_true
@@ -217,8 +217,13 @@ class ParticleDistribution(object):
             return functional_energy_migration( self.log_e, value,
                                              self._migration_function) 
         elif self._energy_migration_method == "matrix":
+            if self.e_mig_normalized == None:
+                self.e_mig_normalized = np.apply_along_axis( normalize_to_prob, 
+                                                             arr=self.e_mig, 
+                                                             axis=1)
+
             return matrix_energy_migration( self.log_e, value,
-                                            self.log_e, self.e_mig )
+                                            self.log_e, self.e_mig_normalized )
         else:
             raise ValueError("Energy Migration Method not implemented")
 
@@ -359,11 +364,7 @@ class ParticleDistribution(object):
         part.phi_diffuse = sens.data.field("phi_diffuse") * units.deg
 #        part.r68_psf = sens.data.field("R68_psf") * units.meter
         part.e_mig =  sens.data.field("E_migration") 
-
-        # normalize the migration matrix to be a probability:
-        # TODO: which axis? along E_true or E_reco?
-        np.apply_along_axis( normalize_to_prob, arr=part.e_mig, axis=1)
-
+        
         return part
 
 
