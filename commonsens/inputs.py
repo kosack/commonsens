@@ -31,7 +31,8 @@ from scipy.interpolate import RectBivariateSpline, interp1d
 from astropy.io import fits
 from astropy import units
 
-from commonsens import spectra, config
+from commonsens import spectra
+from commonsens import config
 
 
 def extrap(x, xp, yp):

@@ -8,11 +8,13 @@ from matplotlib import pyplot as plt
 from math import pi
 #import quantities as pq
 from astropy import units
+from astropy.convolution import convolve
 from scipy import optimize
 
 from commonsens import inputs
 from commonsens import spectra
 from commonsens import stats
+from commonsens import config
 
 
 EPSILON = 1.0e-10
@@ -44,10 +46,9 @@ def solid_angle( theta ):
     # return (1.0-np.cos(theta.to(units.rad)))*2.0*np.pi*units.steradian
 
 
-def smooth( values, windowsize=4 ):
+def smooth( values, windowsize=config.smooth_window_size ):
     window = np.ones(windowsize,'d')
-    padval = np.concatenate( [ [values[0]]*windowsize,values,[values[-1]]*windowsize] )
-    return np.convolve(  window/len(window), padval, mode='same')[windowsize-1:-windowsize-1]
+    return convolve(   values, window/len(window) )
 
 
 def residual_signif(N_on, N_off, alpha, minsig):
@@ -107,7 +108,9 @@ def calc_from_distributions( name, gammas, electrons, protons,
     gamma_aeff_reco = gammas.effective_area_reco()
     delta_e = gammas.delta_e
 
-    #    background_rate = smooth(background_rate.value)*background_rate.unit
+    if (config.enable_smoothing):
+        background_rate = smooth(background_rate.value)*background_rate.unit
+        gamma_aeff_reco = smooth(gamma_aeff_reco.value)*gamma_aeff_reco.unit
 
     return calc_sensitivity( name, background_rate, gamma_aeff_reco, 
                              delta_e, **kwargs)
