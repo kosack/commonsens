@@ -56,6 +56,11 @@ def normalize_to_prob(x):
     x[x>0] /= np.sum(x)
     return x
 
+def zero_if_low_stats(x):
+    if sum(x>0) < 4:
+        x *= 0
+    return x
+
 
 def functional_energy_migration(log_e_true, value, migration_function):
     """very simplistic energy migration (doesn't take into account any
@@ -134,9 +139,9 @@ class ParticleDistribution(object):
         self.r_simulated = None #: radius of simulation per E_true bin
         self.phi_diffuse = None #: diffuse simulation cone angle 
         self.e_mig = None #: 2D energy migration matrix (E_true vs E_reco)
-        self.e_mig_normalized = None #: normalized 2D energy migration matrix
         self.r68_psf = None #: 68% containment radius of PSF
 
+        self._e_mig_normalized = None #: normalized 2D energy migration matrix
         self._dnde_true_func = lambda e_true : 0.0*e_true
         self._migration_function = lambda e_true : e_true # default Etrue=Ereco
 #        self._energy_migration_method = "matrix"
@@ -153,6 +158,19 @@ class ParticleDistribution(object):
             raise ValueError("unknown energy migration method")
         self._energy_migration_method = method
         
+
+    @property
+    def e_mig_normalized(self):
+        if self._e_mig_normalized == None:
+            self._e_mig_normalized = np.apply_along_axis( normalize_to_prob, 
+                                                          arr=self.e_mig, 
+                                                          axis=1)
+            # self._e_mig_noramalized = np.apply_along_axis( zero_if_low_stats,
+            #                                                arr=self._e_mig_normalized,
+            #                                                axis=1)
+
+
+        return self._e_mig_normalized
 
     def resample(self, log_e_min, log_e_max, nbins):
         """
@@ -217,22 +235,10 @@ class ParticleDistribution(object):
             return functional_energy_migration( self.log_e, value,
                                              self._migration_function) 
         elif self._energy_migration_method == "matrix":
-            if self.e_mig_normalized == None:
-                self.e_mig_normalized = np.apply_along_axis( normalize_to_prob, 
-                                                             arr=self.e_mig, 
-                                                             axis=1)
-
             return matrix_energy_migration( self.log_e, value,
                                             self.log_e, self.e_mig_normalized )
         else:
             raise ValueError("Energy Migration Method not implemented")
-
-
-    def generateBiasFromMigration(self):
-        pass
-        # for ii in range(self.nbins):
-        #     avg = np.average( self.log_e, weights=self.e_mig[ii] )
-        
 
 
     @property
@@ -330,7 +336,7 @@ class ParticleDistribution(object):
 
         plt.subplot(1,2,2)
         plt.title("Energy Migration")
-        plt.pcolormesh(self.log_e_lo, self.log_e_lo, self.e_mig.T)
+        plt.pcolormesh(self.log_e_lo, self.log_e_lo, self.e_mig_normalized.T)
         # plt.errorbar( self.log_e, np.log10(10**self.log_e + self.e_bias), 
         #               self.e_res, color='w', lw=3 )
         plt.plot(self.log_e, 
