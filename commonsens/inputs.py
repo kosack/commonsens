@@ -4,7 +4,7 @@
 the sensitivity calculation.
 
 ParticleDistributions may be constructed from compatible FITS files
-using the from_fits() constructor.  They may also be resampled to a new binning.
+using the from_fits() constructor.  
 
 >>> gammas = GammaDistribution.from_fits( "mysens.fits" )
 >>> gammas.plot()  # show some debugging info
@@ -147,11 +147,6 @@ class ParticleDistribution(object):
 #        self._energy_migration_method = "matrix"
         self._energy_migration_method = "shifted"
 
-    def _resample(self, newlog_e, values ):
-        """ resample values to new bin centers """
-        spline =  interp1d( self.log_e, values, kind="linear",
-                            bounds_error=False, fill_value=0 )  
-        return spline( newlog_e )
 
     def set_energy_migration_method(self, method ):
         if method not in ("matrix", "functional"):
@@ -161,68 +156,16 @@ class ParticleDistribution(object):
 
     @property
     def e_mig_normalized(self):
+        """
+        returns the energy migration matrix, normalized such that the
+        integral along the true energy is 1.0
+        """
         if self._e_mig_normalized == None:
             self._e_mig_normalized = np.apply_along_axis( normalize_to_prob, 
                                                           arr=self.e_mig, 
                                                           axis=1)
-            # self._e_mig_noramalized = np.apply_along_axis( zero_if_low_stats,
-            #                                                arr=self._e_mig_normalized,
-            #                                                axis=1)
-
-
         return self._e_mig_normalized
 
-    def resample(self, log_e_min, log_e_max, nbins):
-        """
-        returns new ParticleDistribution interpolated using splines to a
-        new binning. Be careful to set the min and max in valid ranges
-        where there is good statistics per bin in the original
-        distribution, otherwise the interpolation will go crazy
-
-        note that this creates new binning from an old one, but does
-        not increase statistics. To do that you should rebin first,
-        and then resample. Also note that only summable quantities can be
-        rebinned, others should be interpolated.
-
-        :param log_e_min: new lowest energy (left edge of first bin)
-        :param log_e_max: new highest energy (right edge of last bin)
-        :param nbins: new number of bins
-        """
-        
-        therange = np.linspace(log_e_min,log_e_max, nbins+1)
-        log_e_lo = therange[0:-1]
-        log_e_hi = therange[1:]
-        newlog_e = (log_e_hi+log_e_lo)/2.0
-
-        dist = ParticleDistribution( log_e_lo,log_e_hi, 
-                                     name=self._name+"_resamp")
-        newlog_e = dist.log_e
-
-        # kind of a hack:
-        # loop over values in the class dictionary (to avoid having to
-        # write out each data member). Skip members starting with _ or
-        # ending in _mig, and treat the migration matrix separately:
-        for key in self.__dict__.keys():
-            if  (not key.startswith("_")) and  (not key.endswith("_mig")):
-                val = self.__dict__[key]
-                if (val == None):
-                    continue
-                if type(val) == units.Quantity:
-                    dist.__dict__[key] = self._resample( newlog_e, 
-                                                         val.value )*val.unit
-                else:
-                    dist.__dict__[key] = self._resample( newlog_e, val )
-
-        #resample the migration matrix
-        
-        miginterp = RectBivariateSpline( self.log_e,self.log_e, self.e_mig )
-        dist.e_mig = miginterp( newlog_e,newlog_e )
-        
-        dist._migration_function = self._migration_function
-        dist._dnde_true_func = self._dnde_true_func
-        dist._energy_migration_method = self._energy_migration_method
-
-        return dist
 
     def _migrate_etrue_to_ereco(self, value ):
         """
