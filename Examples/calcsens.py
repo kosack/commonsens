@@ -20,17 +20,18 @@ import os
 if __name__ == '__main__':
     
     parser = OptionParser()
-    # parser.add_option("-l","--label", dest="label", 
-    #                   help="name of analysis")
-    parser.add_option("-b","--batch", dest="batch", 
+
+    parser.add_option("-b","--batch", dest="batch", action="store_true",
                       help="batch mode, don't display")
-    parser.add_option("-w","--write", dest="write", 
+    parser.add_option("-w","--write", dest="write",  action="store_true", 
                       help="write out the plots")
 
 
     parser.set_usage("calcsens.py [options] <performance file> ")
     (options, args) = parser.parse_args()
 
+    if (options.write):
+        print "WRITING", options.write
 
     for filename in args:
         
