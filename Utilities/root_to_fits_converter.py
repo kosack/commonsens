@@ -116,7 +116,7 @@ if __name__ == '__main__':
                                   range=[ [etlo[0],ethi[nx-1]] ,
                                           [erlo[0],erhi[ny-1]] ],\
                     axisNames=['logE_t','logE_r'], name="MIGRATION")
-    mig.hist=array(mat)
+    mig.hist=np.array(mat)
 
     outputfilename = os.path.splitext(os.path.basename(rootfilename))[0]+".fits"
     print "WRITING:",outputfilename
