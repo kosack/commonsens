@@ -46,7 +46,9 @@ def solid_angle( theta ):
     # return (1.0-np.cos(theta.to(units.rad)))*2.0*np.pi*units.steradian
 
 
-def smooth( values, windowsize=config.smooth_window_size ):
+def smooth( values ):
+    windowsize=config.smooth_window_size
+    print "smooth with window ", windowsize
     window = np.ones(windowsize,'d')
     return convolve(   values, window/len(window) )
 
@@ -298,11 +300,11 @@ def plot_rates( log_e, rate_p, rate_e, sens ):
     xlabel_energy()
     plt.legend( loc="best")
 
-def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
+def plot_sensitivity(log_e, sens, esquared=False, shade_percent=None, **kwargs):
     """
     Display the differential sensitivity curve 
 
-    :param sens: sensitivity output dictrionary
+    :param sens: sensitivity output dictionary
     """
 
     E = 10**log_e * units.TeV
@@ -315,10 +317,21 @@ def plot_sensitivity(log_e, sens, esquared=False, **kwargs):
 
     par = sens['params']
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
-                                             par['min_signif'], sens['name'])
+                                          par['min_signif'], sens['name'])
+    lines = None
+    if shade_percent == None:
+        lines = plt.loglog( E.value, 
+                            sensitivity.value,
+                            marker=None,
+                            label=label, drawstyle="default",**kwargs )
+    else:
+        # do a shaded region:
+        plt.fill_between( E.value, 
+                          sensitivity.value-sensitivity.value*shade_percent, 
+                          sensitivity.value+sensitivity.value*shade_percent, 
+                          label=label, **kwargs )
 
-    lines = plt.loglog( E.value, sensitivity.value, marker=None,
-                          label=label, drawstyle="default",**kwargs )
+
     plt.ylabel("Sens {0}".format( sensitivity.unit.to_string(format='latex') ))
     xlabel_energy()
 
