@@ -123,7 +123,7 @@ def calc_from_distributions( name, gammas, electrons, protons,
 def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
                      obstime=5*units.h, 
                      num_bg_regions=2, min_signif=5.0, min_events=10.0, 
-                     min_sys_pct=5.0, verbose=False):
+                     min_sys_pct=5.0):
     """
     calculates a sensitivity curve. Returns a dictionary of energy bin
     ranges, senstivitity measurement, and intermediate values useful
@@ -151,7 +151,7 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
         isintegral=False
 
 
-    if verbose:
+    if config.verbose:
         print "CALCULATING SENSITIVITY FOR '{0}':".format(name)
         print "   num_bg_regions: ", num_bg_regions
         print "             time: ", \
@@ -161,6 +161,17 @@ def calc_sensitivity(name, background_rate, gamma_aeff_reco, delta_e,
         print "      min_sys_pct: ", min_sys_pct,"%"
         print "         integral: ", isintegral
     
+
+    # clean the histograms: remove anything below X% of the peak in
+    # effective area:
+    gamma_aeff_reco = gamma_aeff_reco.copy()
+    background_rate = background_rate.copy()
+    max_aeff = config.effective_area_fraction_min*np.max(gamma_aeff_reco[np.isfinite(gamma_aeff_reco)])
+    badbins = gamma_aeff_reco < max_aeff
+
+    gamma_aeff_reco[badbins] = 0
+    background_rate[badbins] = 0
+
     # now calculate number of BG events in each energy bin:
     N_bg = background_rate * obstime.to(units.s)
     N_bg_unit = N_bg.unit
@@ -224,7 +235,7 @@ def calc_integral_sensitivity(name, background_rate,
                               gamma_aeff_reco, delta_e,
                               obstime=5*units.h, 
                               num_bg_regions=2, min_signif=5.0, min_events=10.0, 
-                              min_sys_pct=5.0, verbose=False):
+                              min_sys_pct=5.0):
     """
     not yet working
     """
@@ -242,7 +253,7 @@ def calc_integral_sensitivity(name, background_rate,
     return calc_sensitivity( name, int_bgrate, int_aeff, int_delta_e,
                              obstime=obstime, num_bg_regions=num_bg_regions,
                              min_signif=min_signif, min_events=min_events,
-                             min_sys_pct=min_sys_pct, verbose=verbose )
+                             min_sys_pct=min_sys_pct )
 
 
 def plot_effareas( gammas, electrons, protons ):

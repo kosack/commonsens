@@ -30,7 +30,7 @@ from math import pi
 from astropy.io import fits
 from astropy import units
 from astropy import convolution 
-
+from scipy.interpolate import interp1d
 
 from commonsens import spectra
 from commonsens import config

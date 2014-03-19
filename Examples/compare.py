@@ -15,9 +15,10 @@ if __name__ == '__main__':
     # load the example files
     config.enable_smoothing =False
     config.smooth_parameter=2.0
+#    config.proton_energy_migration_method = "functional"
 
     e2=True
-    bands = True
+    bands = False
     
     datasets = {
         "ParisMVA Hybrid":"PerfData/ParisMVA_Hybrid.fits",
@@ -32,6 +33,7 @@ if __name__ == '__main__':
 
     for name in datasets:
         gammas,electrons,protons = inputs.load_all_from_fits(datasets[name])
+
 
         result=sensitivity.calc_from_distributions( name, 
                                                     gammas,
@@ -66,8 +68,7 @@ if __name__ == '__main__':
                                             background_rate,
                                             a_eff_reco, delta_e, 
                                             obstime=50*units.h,
-                                            num_bg_regions=3,
-                                            verbose=True)
+                                            num_bg_regions=3 )
 
     sensitivity.plot_sensitivity( 0.5*(log_e_hi+log_e_lo), ctasens, 
                                   esquared=e2, linewidth=2, linestyle="dashed" )
