@@ -6,4 +6,4 @@ gamma_energy_migration_method="matrix"
 # smooth the resulting Aeff and background_rate curves before
 # calculating the sensitivity:
 enable_smoothing=False
-smooth_window_size=5 # must be odd
+smooth_parameter=1.0

@@ -27,13 +27,13 @@ __all__ = ['ParticleDistribution', 'load_all_from_fits']
 import numpy as np
 from matplotlib import pyplot as plt
 from math import pi
-from scipy.interpolate import RectBivariateSpline, interp1d
 from astropy.io import fits
 from astropy import units
+from astropy import convolution 
+
 
 from commonsens import spectra
 from commonsens import config
-
 
 def extrap(x, xp, yp):
     """np.interp function with linear extrapolation"""
@@ -41,6 +41,13 @@ def extrap(x, xp, yp):
     y[x < xp[0]] = yp[0] + (x[x<xp[0]]-xp[0]) * (yp[0]-yp[1]) / (xp[0]-xp[1])
     y[x > xp[-1]]= yp[-1] + (x[x>xp[-1]]-xp[-1])*(yp[-1]-yp[-2])/(xp[-1]-xp[-2])
     return y
+
+
+def smooth( values ):
+    #kern = convolution.Gaussian1DKernel(config.smooth_parameter)
+    kern = convolution.Box1DKernel(config.smooth_parameter)
+    print "smooth with:", kern
+    return convolution.convolve(   values, kern, normalize_kernel=True, boundary="extend" )
 
 
 def normalize_to_prob(x):
@@ -87,6 +94,10 @@ def matrix_energy_migration( log_e_true, value, log_e_reco, matrix):
     :param log_e_reco: array of M reco energy bin centers
     :param matrix: NxM array giving probability of Ereco vs Etrue
     """
+    if config.enable_smoothing:
+        matrix=np.apply_along_axis( smooth, arr=matrix, axis=1)
+         
+
     N,M = matrix.shape
 
     recovalues = np.zeros_like(value)
@@ -172,7 +183,7 @@ class ParticleDistribution(object):
         apply energy migration to go from true to reconstructed energy on
         the x-axis
         """
-        print self._name," migration via ", self._energy_migration_method
+        #print self._name," migration via ", self._energy_migration_method
 
         if self._energy_migration_method == "functional":
             return functional_energy_migration( self.log_e, value,
@@ -278,15 +289,23 @@ class ParticleDistribution(object):
         # see if they compare.
 
         plt.subplot(1,2,2)
+        plt.loglog()
         plt.title("Energy Migration")
-        plt.pcolormesh(self.log_e_lo, self.log_e_lo, self.e_mig_normalized.T)
+        plt.pcolormesh(10**self.log_e_lo, 10**self.log_e_lo, 
+                       self.e_mig_normalized.T)
+        plt.xlim( 10**self.log_e_lo[0], 10**self.log_e_hi[-1])
+        plt.ylim( 10**self.log_e_lo[0], 10**self.log_e_hi[-1])
+        plt.grid( color='white' )
+
         # plt.errorbar( self.log_e, np.log10(10**self.log_e + self.e_bias), 
         #               self.e_res, color='w', lw=3 )
-        plt.plot(self.log_e, 
-                 np.log10(self._migration_function(10**self.log_e)),
-                 color="red", lw=3, ls="--")
-        plt.xlabel("log_e_true")
-        plt.ylabel("log_e_reco")
+
+        # plt.plot(self.log_e, 
+        #          np.log10(self._migration_function(10**self.log_e)),
+        #          color="red", lw=3, ls="--")
+        plt.plot(10**self.log_e,10**self.log_e, color="red", lw=3, ls="--")
+        plt.xlabel("E_true")
+        plt.ylabel("E_reco")
         plt.colorbar()
 
     @classmethod

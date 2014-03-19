@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from math import pi
 #import quantities as pq
 from astropy import units
-from astropy.convolution import convolve
 from scipy import optimize
 
 from commonsens import inputs
@@ -46,11 +45,19 @@ def solid_angle( theta ):
     # return (1.0-np.cos(theta.to(units.rad)))*2.0*np.pi*units.steradian
 
 
-def smooth( values ):
-    windowsize=config.smooth_window_size
-    print "smooth with window ", windowsize
-    window = np.ones(windowsize,'d')
-    return convolve(   values, window/len(window) )
+def fill_between(x, y1, y2=0, ax=None, **kwargs):
+    """Plot filled region between `y1` and `y2`.
+
+    This function works exactly the same as matplotlib's fill_between, except
+    that it also plots a proxy artist (specifically, a rectangle of 0 size)
+    so that it can be added it appears on a legend.
+    """
+    ax = ax if ax is not None else plt.gca()
+    ax.fill_between(x, y1, y2, **kwargs)
+    p = plt.Rectangle((0, 0), 0, 0, **kwargs)
+    ax.add_patch(p)
+    return p
+
 
 
 def residual_signif(N_on, N_off, alpha, minsig):
@@ -109,10 +116,6 @@ def calc_from_distributions( name, gammas, electrons, protons,
     background_rate = calc_background_rate( gammas, electrons,protons)
     gamma_aeff_reco = gammas.effective_area_reco()
     delta_e = gammas.delta_e
-
-    if (config.enable_smoothing):
-        background_rate = smooth(background_rate.value)*background_rate.unit
-        gamma_aeff_reco = smooth(gamma_aeff_reco.value)*gamma_aeff_reco.unit
 
     return calc_sensitivity( name, background_rate, gamma_aeff_reco, 
                              delta_e, **kwargs)
@@ -318,18 +321,22 @@ def plot_sensitivity(log_e, sens, esquared=False, shade_percent=None, **kwargs):
     par = sens['params']
     label=r"{2} {0}, {1} $\sigma$".format(par['obstime'].to(units.h), 
                                           par['min_signif'], sens['name'])
+
+    plt.loglog()
+
     lines = None
-    if shade_percent == None:
+    if shade_percent is not None:
+        # do a shaded region:
+        fill_between( E.value, 
+                      sensitivity.value-sensitivity.value*shade_percent, 
+                      sensitivity.value+sensitivity.value*shade_percent, 
+                      label=label, **kwargs )
+    else :
         lines = plt.loglog( E.value, 
                             sensitivity.value,
                             marker=None,
                             label=label, drawstyle="default",**kwargs )
-    else:
-        # do a shaded region:
-        plt.fill_between( E.value, 
-                          sensitivity.value-sensitivity.value*shade_percent, 
-                          sensitivity.value+sensitivity.value*shade_percent, 
-                          label=label, **kwargs )
+
 
 
     plt.ylabel("Sens {0}".format( sensitivity.unit.to_string(format='latex') ))

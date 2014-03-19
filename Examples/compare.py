@@ -13,24 +13,22 @@ if __name__ == '__main__':
     
 
     # load the example files
-    config.gamma_energy_migration_method = "matrix"
-    config.electron_energy_migration_method = "matrix"
-    config.proton_energy_migration_method = "matrix"
     config.enable_smoothing =False
-    config.smooth_window_size=3
+    config.smooth_parameter=2.0
+
+    e2=True
+    bands = True
     
     datasets = {
         "ParisMVA Hybrid":"PerfData/ParisMVA_Hybrid.fits",
         "APR": "PerfData/APR.fits",
         "Loose Zeta": "PerfData/dan_zeta_loose.fits",
-        "Mono Tight old": "PerfData/Markus_Mono_Tight_Old.fits",
         "Mono Tight": "PerfData/Markus_Mono_Tight.fits",
         "Thomas Mono": "PerfData/thomas_mono.fits"       
     }
 
+    colors = list(np.linspace(0,1,len(datasets)))
     plt.figure(figsize=(10,10))
-
-    e2=True
 
     for name in datasets:
         gammas,electrons,protons = inputs.load_all_from_fits(datasets[name])
@@ -40,9 +38,18 @@ if __name__ == '__main__':
                                                     electrons,
                                                     protons,
                                                     obstime=50*units.h )
-        
-        sensitivity.plot_sensitivity( gammas.log_e, result, 
-                                      esquared=e2, linewidth=2)
+
+        if bands:
+            sensitivity.plot_sensitivity( gammas.log_e, result, 
+                                          esquared=e2, linewidth=1,
+                                          shade_percent=0.5, alpha=0.6, 
+                                          color=cm.rainbow(colors.pop()))
+
+        else:
+            sensitivity.plot_sensitivity( gammas.log_e, result, 
+                                          esquared=e2, linewidth=3,
+                                          shade_percent=None, alpha=0.8, 
+                                          color=cm.rainbow(colors.pop()))
 
 
     # overlay Crab contours
@@ -66,9 +73,9 @@ if __name__ == '__main__':
                                   esquared=e2, linewidth=2, linestyle="dashed" )
     
     
-    plt.vlines( [0.030,0.050], 1e-14,1e-5, linestyle='dotted')
+    plt.vlines( [0.030,0.050], 1e-14,1e-5, linestyle='dotted', linewidth=2)
 
-    plt.legend(loc="best", ncol=2)
+    plt.legend(loc="best", ncol=2, frameon=False, fontsize="medium")
     plt.grid(alpha=0.3)    
     plt.xlim( 0.02, 100 )
     plt.show()
