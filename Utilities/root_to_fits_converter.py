@@ -68,57 +68,59 @@ def get_hist_2d(rootfile,name):
 
 if __name__ == '__main__':
 
-    rootfilename = sys.argv.pop()
-    print rootfilename
-
-    rootfile = TFile(rootfilename)
-
     hists_to_get = ['N_detected',
                     'N_simulated',
                     'r_simulated',
                     'ThetaSqr',
-                    'phi_diffuse']
-#                    'R68_psf',
-#                    'E_res',
-#                    'E_bias' ]
-
-    E = None
-    cols = []
-
-    # get the 1D columns:
-    for histname in hists_to_get:
-        lo,hi,cen, val = get_hist_1d( rootfile, histname )
-
-        if len(cols) == 0:
-            cols.append(fits.Column( name="LOG10_E_LO", format="D",array=lo ))
-            cols.append(fits.Column( name="LOG10_E_HI", format="D",array=hi ))
-
-        cols.append( fits.Column( name=histname, format="D", array=val ))
-
-    #insert the migration matrix:
-    try:
-        etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "E_migration" )
-    except:
-        etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "EMig" )
-
-    cols.append( fits.Column( name="E_migration",
-                                format="{0}D".format(len(mat[0])),
-                                array=mat))
-
-    tbhdu = fits.new_table( cols )
-    tbhdu.name="SENS"
+                    'phi_diffuse',
+                    'R68_psf']
+    #                    'E_res',
+    #                    'E_bias' ]
 
 
+    for rootfilename in  sys.argv:
+        print rootfilename
 
-    nx = len(et)
-    ny = len(er)
-    mig = fitshistogram.Histogram(bins=[nx,ny],\
-                                  range=[ [etlo[0],ethi[nx-1]] ,
-                                          [erlo[0],erhi[ny-1]] ],\
-                    axisNames=['logE_t','logE_r'], name="MIGRATION")
-    mig.hist=np.array(mat)
+        rootfile = TFile(rootfilename)
 
-    outputfilename = os.path.splitext(os.path.basename(rootfilename))[0]+".fits"
-    print "WRITING:",outputfilename
-    hdus = fits.HDUList( hdus=[fits.PrimaryHDU(),tbhdu,mig.asFITS()] )
-    hdus.writeto(outputfilename, clobber=True)
+
+        E = None
+        cols = []
+
+        # get the 1D columns:
+        for histname in hists_to_get:
+            lo,hi,cen, val = get_hist_1d( rootfile, histname )
+
+            if len(cols) == 0:
+                cols.append(fits.Column( name="LOG10_E_LO", format="D",array=lo ))
+                cols.append(fits.Column( name="LOG10_E_HI", format="D",array=hi ))
+
+            cols.append( fits.Column( name=histname, format="D", array=val ))
+
+        #insert the migration matrix:
+        try:
+            etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "E_migration" )
+        except:
+            etlo,ethi,et,erlo,erhi,er,mat = get_hist_2d( rootfile, "EMig" )
+
+        cols.append( fits.Column( name="E_migration",
+                                    format="{0}D".format(len(mat[0])),
+                                    array=mat))
+
+        tbhdu = fits.new_table( cols )
+        tbhdu.name="SENS"
+
+
+
+        nx = len(et)
+        ny = len(er)
+        mig = fitshistogram.Histogram(bins=[nx,ny],\
+                                      range=[ [etlo[0],ethi[nx-1]] ,
+                                              [erlo[0],erhi[ny-1]] ],\
+                        axisNames=['logE_t','logE_r'], name="MIGRATION")
+        mig.hist=np.array(mat)
+
+        outputfilename = os.path.splitext(os.path.basename(rootfilename))[0]+".fits"
+        print "WRITING:",outputfilename
+        hdus = fits.HDUList( hdus=[fits.PrimaryHDU(),tbhdu,mig.asFITS()] )
+        hdus.writeto(outputfilename, clobber=True)
