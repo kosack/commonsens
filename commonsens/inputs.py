@@ -172,9 +172,11 @@ class ParticleDistribution(object):
         integral along the true energy is 1.0
         """
         if self._e_mig_normalized == None:
-            self._e_mig_normalized = np.apply_along_axis( normalize_to_prob, 
-                                                          arr=self.e_mig, 
-                                                          axis=1)
+            self._e_mig_normalized = self.e_mig.copy()
+            self._e_mig_normalized = np.apply_along_axis(
+                normalize_to_prob,
+                arr=self._e_mig_normalized,
+                axis=1)
         return self._e_mig_normalized
 
 
