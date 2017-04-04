@@ -32,7 +32,12 @@ if __name__ == '__main__':
     plt.figure(figsize=(10,10))
 
     for name in datasets:
-        gammas,electrons,protons = inputs.load_all_from_fits(datasets[name])
+
+        try:
+            gammas,electrons,protons = inputs.load_all_from_fits(datasets[name])
+        except:
+            print "COULDN'T LOAD", name
+            continue;
 
 
         result=sensitivity.calc_from_distributions( name, 

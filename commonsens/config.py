@@ -1,8 +1,8 @@
 verbose=True
 
 # migration methods should be "matrix" or "functional"
-proton_energy_migration_method="matrix"
-electron_energy_migration_method="matrix"
+proton_energy_migration_method="functional"
+electron_energy_migration_method="functional"
 gamma_energy_migration_method="matrix"
 
 # smooth the resulting Aeff and background_rate curves before
